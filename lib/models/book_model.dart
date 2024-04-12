@@ -1,17 +1,69 @@
+import 'dart:convert';
+
 class Book {
-  String? id;
+  int? id;
   String title;
   String? author;
-  String languageId; //fil - Filipino, eng - English
+  String language; //fil - Filipino, eng - English
   int pageCount;
-  List<String> contents;
 
   Book({
     this.id,
     required this.title,
     this.author,
-    required this.languageId,
+    required this.language,
     required this.pageCount,
-    required this.contents, // Add field initializer for 'contents'
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'author': author,
+      'language': language,
+      'pageCount': pageCount,
+    };
+  }
+
+  static Book fromMap(Map<String, dynamic> map) {
+    return Book(
+      id: map['id'],
+      title: map['title'],
+      author: map['author'],
+      language: map['language'],
+      pageCount: map['pageCount'],
+    );
+  }
+}
+
+class BookPage {
+  int? id;
+  int bookId;
+  int pageNumber;
+  String content;
+
+  BookPage({
+    this.id,
+    required this.bookId,
+    required this.pageNumber,
+    required this.content,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'bookId': bookId,
+      'pageNumber': pageNumber,
+      'content': content,
+    };
+  }
+
+  static BookPage fromMap(Map<String, dynamic> map) {
+    return BookPage(
+      id: map['id'],
+      bookId: map['bookId'],
+      pageNumber: map['pageNumber'],
+      content: map['content'],
+    );
+  }
 }

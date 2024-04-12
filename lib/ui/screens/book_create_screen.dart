@@ -1,3 +1,4 @@
+import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -83,7 +84,17 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Book bookToCreate = Book(
+            title: _titleController.text,
+            author: _authorController.text,
+            language: _languageSelected!,
+            pageCount: _bookContentControllers.length,
+          );
+
+          bookProvider.addBook(bookToCreate,
+              _bookContentControllers.map((e) => e.text).toList());
+        },
       ),
     );
   }

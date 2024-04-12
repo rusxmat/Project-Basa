@@ -1,10 +1,11 @@
 import 'package:basa_proj_app/providers/book_provider.dart';
+import 'package:basa_proj_app/ui/screens/library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/ui/screens/menu_page.dart';
 import 'package:basa_proj_app/ui/screens/ibasa_screen.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
@@ -28,7 +29,7 @@ class BasaApp extends StatelessWidget {
         '/': (context) => const MenuPage(),
         '/ibasa': (context) => IbasaScreen(),
         // '/dict': (context) => DictionaryScreen(),
-        // '/library': (context) => LibraryScreen(),
+        '/library': (context) => LibraryScreen(),
         // '/setting': (context) => SettingScreen(),
         // '/help': (context) => HelpScreen(),
       },
