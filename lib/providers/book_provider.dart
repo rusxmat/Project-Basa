@@ -1,12 +1,13 @@
 import 'package:basa_proj_app/services/book_service.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:basa_proj_app/models/book_model.dart';
-import 'package:sqflite/sqlite_api.dart';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseHelper db = DatabaseHelper();
+  final flutterTts = FlutterTts();
 
   Future<List<String>> ocrBookPhotos(List<XFile> photos) async {
     final textRecognizer = TextRecognizer(script: TextRecognitionScript.latin);
@@ -58,6 +59,10 @@ class BookProvider extends ChangeNotifier {
 
   Future<List<BookPage>> getBookPagesById(int bookId) async {
     return await db.getBookPagesbyBookId(bookId);
+  }
+
+  Future _speak(String text) async {
+    await flutterTts.speak(text);
   }
 
   // // Read a specific book by its index
