@@ -1,5 +1,6 @@
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/shared/constants.dart';
+import 'package:basa_proj_app/ui/modals/mode_choice_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/models/book_model.dart';
@@ -92,12 +93,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 ],
               ),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => BookScreen(book: book),
-                  ),
-                );
+                showDialog(
+                    context: context,
+                    builder: (context) => ModeChoiceModal(
+                          book: book,
+                        ));
               },
             ),
           );
