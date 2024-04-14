@@ -3,7 +3,6 @@ import 'package:speech_to_text/speech_to_text.dart';
 
 class SttProvider with ChangeNotifier {
   SpeechToText? _speechToText;
-  bool _speechEnabled = false;
 
   SttProvider() {
     _speechToText = SpeechToText();
@@ -13,10 +12,7 @@ class SttProvider with ChangeNotifier {
       },
       onStatus: (status) {
         if (status == 'listening') {
-          _speechEnabled = true;
-        } else {
-          _speechEnabled = false;
-        }
+        } else {}
         notifyListeners();
       },
     );

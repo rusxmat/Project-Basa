@@ -109,6 +109,12 @@ class DatabaseHelper {
         .delete('book_pages', where: 'id = ?', whereArgs: [id]);
   }
 
+  Future<int> deleteBookPagesByBookId(int bookId) async {
+    var dbClient = await db;
+    return await dbClient!
+        .delete('book_pages', where: 'bookId = ?', whereArgs: [bookId]);
+  }
+
   Future close() async {
     var dbClient = await db;
     return dbClient!.close();

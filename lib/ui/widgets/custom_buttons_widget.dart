@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -14,13 +15,27 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: ConstantUI.customBlue,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        minimumSize: Size(200, 60),
+      ),
       onPressed: onPressed,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (icon != null) Icon(icon),
           if (icon != null) SizedBox(width: 10),
-          Text(text),
+          Text(
+            text,
+            style: TextStyle(
+              fontFamily: ITIM_FONTNAME,
+              color: Colors.white,
+              fontSize: 20,
+            ),
+          ),
         ],
       ),
     );

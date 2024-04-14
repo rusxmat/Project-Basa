@@ -1,6 +1,7 @@
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/providers/stt_provider.dart';
 import 'package:basa_proj_app/providers/tts_provider.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/shared/constants.dart';
@@ -33,12 +34,6 @@ class _BookScreenState extends State<BookScreen> {
     book = widget.book;
     _ttsProvider = TTSProvider(
         LANGUAGE_VOICES[book.language]!, LANGUAGE_TTS[book.language]!);
-    _ttsProvider!.flutterTts.setProgressHandler((text, start, end, word) {
-      setState(() {
-        _currentWordStart = start;
-        _currentWordEnd = end;
-      });
-    });
     _fetchBookPages();
   }
 
@@ -72,7 +67,23 @@ class _BookScreenState extends State<BookScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(book.title),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: ConstantUI.customYellow,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: ConstantUI.customBlue,
+        title: Text(
+          book.title,
+          style: const TextStyle(
+            fontFamily: ITIM_FONTNAME,
+            color: Colors.white,
+          ),
+        ),
       ),
       body: PageView.builder(
         itemCount: pages.length,
@@ -80,79 +91,98 @@ class _BookScreenState extends State<BookScreen> {
           final page = pages[index];
           return Column(
             children: [
-              Container(
-                padding: EdgeInsets.all(16.0),
+              Expanded(
                 child: Card(
+                  margin: const EdgeInsets.all(10.0),
                   elevation: 4.0,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Page ${page.pageNumber}',
-                        style: TextStyle(
-                            fontSize: 24.0, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 16.0),
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(fontSize: 18.0, color: Colors.black),
-                          children: <TextSpan>[
-                            TextSpan(
-                              text:
-                                  page.content.substring(0, _currentWordStart),
-                            ),
-                            if (_currentWordStart != null)
-                              TextSpan(
-                                text: page.content.substring(
-                                    _currentWordStart!, _currentWordEnd!),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                  backgroundColor: Colors.red,
-                                ),
-                              ),
-                            if (_currentWordEnd != null)
-                              TextSpan(
-                                text: page.content.substring(_currentWordEnd!),
-                              ),
-                          ],
+                  child: Container(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Page ${page.pageNumber}',
+                          style: const TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      Row(
-                        children: [
-                          FloatingActionButton(
-                            child: Icon(Icons.volume_up),
-                            onPressed: () {
-                              _ttsProvider!.flutterTts.setCompletionHandler(() {
-                                setState(() {
-                                  _currentWordStart = null;
-                                  _currentWordEnd = null;
+                        const SizedBox(height: 16.0),
+                        RichText(
+                          textAlign: TextAlign.center,
+                          text: TextSpan(
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              color: Colors.black,
+                              fontFamily: ITIM_FONTNAME,
+                            ),
+                            children: <TextSpan>[
+                              TextSpan(
+                                text: page.content
+                                    .substring(0, _currentWordStart),
+                              ),
+                              if (_currentWordStart != null)
+                                TextSpan(
+                                  text: page.content.substring(
+                                      _currentWordStart!, _currentWordEnd!),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    backgroundColor: ConstantUI.customBlue,
+                                  ),
+                                ),
+                              if (_currentWordEnd != null)
+                                TextSpan(
+                                  text:
+                                      page.content.substring(_currentWordEnd!),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            FloatingActionButton(
+                              child: const Icon(Icons.volume_up),
+                              onPressed: () {
+                                _ttsProvider!.flutterTts
+                                    .setCompletionHandler(() {
+                                  setState(() {
+                                    _currentWordStart = null;
+                                    _currentWordEnd = null;
+                                  });
                                 });
-                              });
-                              _ttsProvider!.speak(page.content);
-                            },
-                          ),
-                          FloatingActionButton(
-                            child: Icon(Icons.mic),
-                            onPressed: () {
-                              setState(() {
-                                sttMode = !sttMode;
-                              });
-                              if (sttMode) _startListening();
-                              if (!sttMode) _stopListening();
-                            },
-                          ),
-                        ],
-                      )
-                    ],
+
+                                _ttsProvider!.flutterTts.setProgressHandler(
+                                    (text, start, end, word) {
+                                  setState(() {
+                                    _currentWordStart = start;
+                                    _currentWordEnd = end;
+                                  });
+                                });
+                                _ttsProvider!.speak(page.content);
+                              },
+                            ),
+                            FloatingActionButton(
+                              child: const Icon(Icons.mic),
+                              onPressed: () {
+                                setState(() {
+                                  sttMode = !sttMode;
+                                });
+                                if (sttMode) _startListening();
+                                if (!sttMode) _stopListening();
+                              },
+                            ),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ),
               (sttMode)
-                  ? Container(
-                      padding: EdgeInsets.all(16.0),
+                  ? Expanded(
+                      flex: 1,
                       child: Card(
+                        margin: const EdgeInsets.all(10.0),
                         elevation: 4.0,
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -167,7 +197,9 @@ class _BookScreenState extends State<BookScreen> {
                         ),
                       ),
                     )
-                  : Container(),
+                  : Container(
+                      height: 1,
+                    ),
             ],
           );
         },

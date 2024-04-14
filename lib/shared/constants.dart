@@ -3,6 +3,11 @@ const Map<String, String> LANGUAGE_CODES = {
   'English': 'eng',
 };
 
+const Map<String, String> LANGUAGE_CODES_TO_VALUE = {
+  'fil': 'Filipino',
+  'eng': 'English',
+};
+
 const Map<String, String> LANGUAGE_TTS = {
   'fil': 'fil-PH',
   'eng': 'en-US',

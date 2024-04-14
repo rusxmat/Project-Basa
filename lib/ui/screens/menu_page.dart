@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/ui/widgets/custom_buttons_widget.dart';
-
+import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class MenuPage extends StatelessWidget {
@@ -11,57 +11,65 @@ class MenuPage extends StatelessWidget {
     FlutterTts flutterTts = FlutterTts();
 
     return Scaffold(
+      backgroundColor: ConstantUI.customYellow,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text('BÀSA', style: TextStyle(fontSize: 48)),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomButton(
-                    text: 'ibàsa',
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/ibasa');
-                    }),
-                CustomButton(
-                    text: 'mga kwento',
-                    onPressed: () {
-                      flutterTts.getLanguages.then((languages) {
-                        print(languages);
-                      });
-                      flutterTts.getVoices.then((languages) {
-                        print(languages);
-                      });
-                      Navigator.pushNamed(context, '/library');
-                    }),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                CustomButton(
-                    text: 'aBaKaDa',
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/dict');
-                    }),
-                Row(
-                  children: [
-                    CustomButton(
-                        text: 'settings',
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/setting');
-                        }),
-                    CustomButton(
-                        text: 'help',
-                        onPressed: () {
-                          Navigator.pushNamed(context, '/help');
-                        }),
-                  ],
-                )
-              ],
-            ),
-          ],
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 150, 0, 200),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Image(
+                image: LOGO,
+                width: 100,
+              ),
+              Container(
+                padding: const EdgeInsets.fromLTRB(0, 10, 0, 30),
+                child: const Image(
+                  image: LOGO_TXT,
+                  width: 100,
+                ),
+              ),
+
+              const Spacer(),
+              CustomButton(
+                  text: 'ibàsa',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/ibasa');
+                  }),
+              const Spacer(),
+              CustomButton(
+                  text: 'mga kwento',
+                  onPressed: () {
+                    flutterTts.getLanguages.then((languages) {
+                      print(languages);
+                    });
+                    flutterTts.getVoices.then((languages) {
+                      print(languages);
+                    });
+                    Navigator.pushNamed(context, '/library');
+                  }),
+              const Spacer(),
+              CustomButton(
+                  text: 'aBaKaDa',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/dict');
+                  }),
+              // Row(
+              //   children: [
+              //     CustomButton(
+              //         text: 'settings',
+              //         onPressed: () {
+              //           Navigator.pushNamed(context, '/setting');
+              //         }),
+              //     CustomButton(
+              //         text: 'help',
+              //         onPressed: () {
+              //           Navigator.pushNamed(context, '/help');
+              //         }),
+              //   ],
+              // )
+            ],
+          ),
         ),
       ),
     );

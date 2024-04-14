@@ -61,8 +61,11 @@ class BookProvider extends ChangeNotifier {
     return await db.getBookPagesbyBookId(bookId);
   }
 
-  Future _speak(String text) async {
-    await flutterTts.speak(text);
+  // Delete a book by its ID
+  Future<void> deleteBook(int bookId) async {
+    await db.deleteBookPagesByBookId(bookId);
+    await db.deleteBook(bookId);
+    notifyListeners();
   }
 
   // // Read a specific book by its index
@@ -82,13 +85,6 @@ class BookProvider extends ChangeNotifier {
   // }
 
   // // Delete a book by its index
-
-  // void deleteBook(int index) {
-  //   if (index >= 0 && index < books.length) {
-  //     books.removeAt(index);
-  //     notifyListeners();
-  //   }
-  // }
 
   // TODO: Add necessary properties and methods
 

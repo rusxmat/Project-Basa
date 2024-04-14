@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:basa_proj_app/ui/screens/menu_page.dart';
 import 'package:basa_proj_app/ui/screens/ibasa_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,7 +24,12 @@ class BasaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Basa App',
-      theme: ThemeData(primarySwatch: Colors.teal),
+      theme: ThemeData(
+        focusColor: ConstantUI.customBlue,
+        primaryColor: ConstantUI.customBlue,
+        scaffoldBackgroundColor: ConstantUI.customYellow,
+        fontFamily: ITIM_FONTNAME,
+      ),
       initialRoute: '/',
       routes: {
         '/': (context) => const MenuPage(),

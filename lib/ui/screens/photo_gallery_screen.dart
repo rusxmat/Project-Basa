@@ -1,13 +1,15 @@
 import 'dart:io';
 import 'package:basa_proj_app/ui/screens/book_create_screen.dart';
+import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
 
 class PhotoGalleryScreen extends StatefulWidget {
-  List<XFile> photos;
-  PhotoGalleryScreen({super.key, required this.photos});
+  final List<XFile> photos;
+  const PhotoGalleryScreen({super.key, required this.photos});
 
   @override
   _PhotoGalleryScreenState createState() => _PhotoGalleryScreenState();
@@ -28,17 +30,26 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: ConstantUI.customYellow,
       appBar: AppBar(
-        title: Text('Photo Gallery'),
-        actions: [
-          IconButton(
-            icon: (!isSelecting) ? Icon(Icons.select_all) : Icon(Icons.close),
-            onPressed: () {
-              setState(() {
-                isSelecting = !isSelecting; // Toggle the selection mode
-              });
-            },
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: ConstantUI.customYellow,
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: ConstantUI.customBlue,
+        title: const Text(
+          'Mga Larawan',
+          style: TextStyle(
+            fontFamily: ITIM_FONTNAME,
+            color: Colors.white,
+          ),
+        ),
+        actions: [
           (isSelecting)
               ? IconButton(
                   onPressed: () {
@@ -60,48 +71,71 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                       },
                     );
                   },
-                  icon: Icon(Icons.delete))
+                  icon: const Icon(
+                    Icons.delete,
+                    color: ConstantUI.customPink,
+                  ))
               : Container(),
+          IconButton(
+            icon: (!isSelecting)
+                ? const Icon(
+                    Icons.select_all,
+                    color: ConstantUI.customYellow,
+                  )
+                : const Icon(
+                    Icons.close,
+                    color: ConstantUI.customYellow,
+                  ),
+            onPressed: () {
+              setState(() {
+                isSelecting = !isSelecting; // Toggle the selection mode
+              });
+            },
+          ),
         ],
       ),
-      body: ReorderableGridView.count(
-        dragEnabled: !isSelecting,
-        crossAxisCount: 3,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4,
-        children: List.generate(
-          photos.length,
-          (index) {
-            return GestureDetector(
-              key: ValueKey(photos[index]),
-              onTap: (isSelecting)
-                  ? () {
-                      setState(() {
-                        selectedPhotos[index] = !selectedPhotos[index];
-                      });
-                    }
-                  : null,
-              child: Image.file(
-                File(photos[index].path),
-                fit: BoxFit.cover,
-                opacity: AlwaysStoppedAnimation(
-                    ((isSelecting && selectedPhotos[index]) || !isSelecting)
-                        ? 1.0
-                        : 0.5),
-              ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
+        child: ReorderableGridView.count(
+          dragEnabled: !isSelecting,
+          crossAxisCount: 3,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4,
+          children: List.generate(
+            photos.length,
+            (index) {
+              return GestureDetector(
+                key: ValueKey(photos[index]),
+                onTap: (isSelecting)
+                    ? () {
+                        setState(() {
+                          selectedPhotos[index] = !selectedPhotos[index];
+                        });
+                      }
+                    : null,
+                child: Image.file(
+                  File(photos[index].path),
+                  fit: BoxFit.cover,
+                  opacity: AlwaysStoppedAnimation(
+                      ((isSelecting && selectedPhotos[index]) || !isSelecting)
+                          ? 1.0
+                          : 0.5),
+                ),
+              );
+            },
+          ),
+          onReorder: (oldIndex, newIndex) {
+            setState(
+              () {
+                final element = photos.removeAt(oldIndex);
+                photos.insert(newIndex, element);
+              },
             );
           },
         ),
-        onReorder: (oldIndex, newIndex) {
-          setState(
-            () {
-              final element = photos.removeAt(oldIndex);
-              photos.insert(newIndex, element);
-            },
-          );
-        },
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: CustomFloatingAction(
+        btnIcon: FORWARD_ICON,
         onPressed: () {
           Navigator.push(
             context,
@@ -112,7 +146,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
             ),
           );
         },
-        child: Icon(Icons.arrow_forward_ios),
+        btnColor: Colors.white,
       ),
     );
   }

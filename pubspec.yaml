@@ -68,6 +68,15 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets: 
+    - assets/images/basa_logo.png
+    - assets/images/basa_text_logo.png
+
+  fonts: 
+    - family: Itim
+      fonts: 
+        - asset: assets/fonts/Itim-Regular.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

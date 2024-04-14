@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:basa_proj_app/ui/screens/photo_gallery_screen.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
+import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 
 class IbasaScreen extends StatefulWidget {
   @override
@@ -62,6 +64,26 @@ class _IbasaScreenState extends State<IbasaScreen> {
     }
 
     return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: ConstantUI.customYellow,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        backgroundColor: ConstantUI.customBlue,
+        title: const Text(
+          'Kamera',
+          style: TextStyle(
+            fontFamily: ITIM_FONTNAME,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      backgroundColor: ConstantUI.customYellow,
       body: Stack(
         children: [
           FutureBuilder<void>(
@@ -77,16 +99,26 @@ class _IbasaScreenState extends State<IbasaScreen> {
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 70.0, vertical: 50.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  ElevatedButton(
-                    onPressed: _capturePhoto,
-                    child: const Text('Capture Photo'),
+                  const Spacer(
+                    flex: 2,
                   ),
-                  const SizedBox(width: 16.0),
-                  ElevatedButton(
+                  CustomFloatingAction(
+                    btnIcon: const Icon(
+                      Icons.circle,
+                      color: ConstantUI.customBlue,
+                      size: 50,
+                    ),
+                    onPressed: _capturePhoto,
+                    btnColor: Colors.white,
+                  ),
+                  const Spacer(),
+                  CustomFloatingAction(
+                    btnIcon: FORWARD_ICON,
                     onPressed: () {
                       Navigator.push(
                         context,
@@ -97,7 +129,7 @@ class _IbasaScreenState extends State<IbasaScreen> {
                         ),
                       );
                     },
-                    child: const Text('Done'),
+                    btnColor: Colors.white,
                   ),
                 ],
               ),
