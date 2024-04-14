@@ -1,9 +1,11 @@
 import 'package:basa_proj_app/providers/book_provider.dart';
+import 'package:basa_proj_app/providers/stt_provider.dart';
 import 'package:basa_proj_app/providers/tts_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/shared/constants.dart';
 import 'package:flutter/widgets.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 class BookScreen extends StatefulWidget {
   final Book book;
@@ -15,10 +17,15 @@ class BookScreen extends StatefulWidget {
 
 class _BookScreenState extends State<BookScreen> {
   final BookProvider _bookProvider = BookProvider();
-  TTSProvider? _ttsProvider;
-  int? _currentWordStart, _currentWordEnd;
   late Book book = widget.book;
   late List<BookPage> pages = [];
+
+  TTSProvider? _ttsProvider;
+  int? _currentWordStart, _currentWordEnd;
+
+  SttProvider _sttProvider = SttProvider();
+  bool sttMode = false;
+  String wordsSpoken = "";
 
   @override
   void initState() {
@@ -42,6 +49,25 @@ class _BookScreenState extends State<BookScreen> {
     });
   }
 
+  void _startListening() async {
+    await _sttProvider.speechToText!.listen(
+      onResult: _onSpeechResult,
+    );
+  }
+
+  void _stopListening() async {
+    await _sttProvider.speechToText!.stop();
+    setState(() {
+      sttMode = false;
+    });
+  }
+
+  void _onSpeechResult(result) {
+    setState(() {
+      wordsSpoken = "${result.recognizedWords}";
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,72 +78,97 @@ class _BookScreenState extends State<BookScreen> {
         itemCount: pages.length,
         itemBuilder: (context, index) {
           final page = pages[index];
-          return Container(
-            padding: EdgeInsets.all(16.0),
-            child: Card(
-              elevation: 4.0,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Page ${page.pageNumber}',
-                    style:
-                        TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 16.0),
-                  RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(
-                      style: TextStyle(fontSize: 18.0, color: Colors.black),
-                      children: <TextSpan>[
-                        TextSpan(
-                          text: page.content.substring(0, _currentWordStart),
-                        ),
-                        if (_currentWordStart != null)
-                          TextSpan(
-                            text: page.content.substring(
-                                _currentWordStart!, _currentWordEnd!),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              backgroundColor: Colors.red,
+          return Column(
+            children: [
+              Container(
+                padding: EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 4.0,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Page ${page.pageNumber}',
+                        style: TextStyle(
+                            fontSize: 24.0, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 16.0),
+                      RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: TextStyle(fontSize: 18.0, color: Colors.black),
+                          children: <TextSpan>[
+                            TextSpan(
+                              text:
+                                  page.content.substring(0, _currentWordStart),
                             ),
+                            if (_currentWordStart != null)
+                              TextSpan(
+                                text: page.content.substring(
+                                    _currentWordStart!, _currentWordEnd!),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  backgroundColor: Colors.red,
+                                ),
+                              ),
+                            if (_currentWordEnd != null)
+                              TextSpan(
+                                text: page.content.substring(_currentWordEnd!),
+                              ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          FloatingActionButton(
+                            child: Icon(Icons.volume_up),
+                            onPressed: () {
+                              _ttsProvider!.flutterTts.setCompletionHandler(() {
+                                setState(() {
+                                  _currentWordStart = null;
+                                  _currentWordEnd = null;
+                                });
+                              });
+                              _ttsProvider!.speak(page.content);
+                            },
                           ),
-                        if (_currentWordEnd != null)
-                          TextSpan(
-                            text: page.content.substring(_currentWordEnd!),
+                          FloatingActionButton(
+                            child: Icon(Icons.mic),
+                            onPressed: () {
+                              setState(() {
+                                sttMode = !sttMode;
+                              });
+                              if (sttMode) _startListening();
+                              if (!sttMode) _stopListening();
+                            },
                           ),
-                      ],
-                    ),
+                        ],
+                      )
+                    ],
                   ),
-                  FloatingActionButton(
-                    child: Icon(Icons.volume_up),
-                    onPressed: () {
-                      _ttsProvider!.flutterTts.getDefaultVoice.then((value) {
-                        print('\n\n\n\nThis is the default voice: ');
-                        print(value);
-                      });
-
-                      _ttsProvider!.flutterTts.getVoices.then((value) {
-                        List<Map> _voices = List<Map>.from(value);
-                        _voices = _voices
-                            .where((voice) => voice["locale"].contains('en-US'))
-                            .toList();
-                        print(_voices);
-                      });
-
-                      _ttsProvider!.flutterTts.setCompletionHandler(() {
-                        setState(() {
-                          _currentWordStart = null;
-                          _currentWordEnd = null;
-                        });
-                      });
-                      _ttsProvider!.speak(page.content);
-                    },
-                  ),
-                ],
+                ),
               ),
-            ),
+              (sttMode)
+                  ? Container(
+                      padding: EdgeInsets.all(16.0),
+                      child: Card(
+                        elevation: 4.0,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text(
+                              'Speech to Text',
+                              style: TextStyle(
+                                  fontSize: 24.0, fontWeight: FontWeight.bold),
+                            ),
+                            Text(wordsSpoken),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container(),
+            ],
           );
         },
       ),
