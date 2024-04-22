@@ -5,12 +5,14 @@ class CustomFloatingAction extends StatelessWidget {
   final VoidCallback onPressed;
   final IconData? icon;
   final Color btnColor;
+  final bool isDisabled;
 
   const CustomFloatingAction({
     required this.btnIcon,
     required this.onPressed,
     this.icon,
     required this.btnColor,
+    this.isDisabled = false,
   });
 
   @override
@@ -26,7 +28,7 @@ class CustomFloatingAction extends StatelessWidget {
         0.5,
       ),
       backgroundColor: btnColor,
-      onPressed: onPressed,
+      onPressed: (!isDisabled) ? onPressed : null,
       child: btnIcon,
     );
   }

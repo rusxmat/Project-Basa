@@ -46,6 +46,7 @@ class DatabaseHelper {
         bookId INTEGER,
         pageNumber INTEGER,
         content TEXT,
+        photo BLOB, 
         FOREIGN KEY (bookId) REFERENCES books (id)
       )
         ''');
@@ -89,7 +90,7 @@ class DatabaseHelper {
     List<Map> maps = await dbClient!
         .query('book_pages', where: 'bookId = ?', whereArgs: [bookId]);
     List<BookPage> bookPages = [];
-    if (maps.length > 0) {
+    if (maps.isNotEmpty) {
       for (int i = 0; i < maps.length; i++) {
         bookPages.add(BookPage.fromMap(maps[i] as Map<String, dynamic>));
       }

@@ -19,8 +19,8 @@ class TTSProvider with ChangeNotifier {
     await _flutterTts.speak(text);
   }
 
-  void stop() async {
-    await _flutterTts.stop();
+  void pause() async {
+    await _flutterTts.pause();
   }
 
   void returnProgressHandler() {

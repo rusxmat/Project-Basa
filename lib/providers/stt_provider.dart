@@ -19,6 +19,7 @@ class SttProvider with ChangeNotifier {
   }
 
   SpeechToText? get speechToText => _speechToText;
+  bool? get isListening => _speechToText!.isListening;
   Future<List<LocaleName>> Function() get locales => _speechToText!.locales;
 
   // Future<bool> initialize() async {

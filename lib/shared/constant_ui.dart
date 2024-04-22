@@ -17,3 +17,9 @@ const Icon FORWARD_ICON = Icon(
   color: ConstantUI.customBlue,
   size: 50,
 );
+
+const Icon DISABLED_ICON = Icon(
+  Icons.do_disturb_alt_rounded,
+  color: ConstantUI.customPink,
+  size: 50,
+);

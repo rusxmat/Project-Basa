@@ -1,9 +1,13 @@
+import 'dart:typed_data';
+
 import 'package:basa_proj_app/services/book_service.dart';
+import 'package:basa_proj_app/shared/image_util.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:basa_proj_app/models/book_model.dart';
+import 'package:image/image.dart';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseHelper db = DatabaseHelper();
@@ -39,16 +43,25 @@ class BookProvider extends ChangeNotifier {
   }
 
   // Create a new book
-  Future<void> addBook(Book book, List<String> bookContent) async {
+  Future<void> addBook(
+      Book book, List<String> bookContent, List<XFile> photos) async {
     final int bookId = await db.createBook(book);
 
     int pageNumber = 1;
-    for (String content in bookContent) {
+
+    for (var i = 0; i < bookContent.length; i++) {
       await db.createBookPage(
-          BookPage(pageNumber: pageNumber, content: content, bookId: bookId));
+        BookPage(
+          pageNumber: pageNumber,
+          content: bookContent[i],
+          bookId: bookId,
+          photo: (photos.isNotEmpty)
+              ? await convertAndCompressImage(photos[i])
+              : null,
+        ),
+      );
       pageNumber++;
     }
-
     notifyListeners();
   }
 

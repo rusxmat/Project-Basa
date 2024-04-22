@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/ui/widgets/custom_buttons_widget.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
-import 'package:flutter_tts/flutter_tts.dart';
 
 class MenuPage extends StatelessWidget {
   const MenuPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    FlutterTts flutterTts = FlutterTts();
-
     return Scaffold(
       backgroundColor: ConstantUI.customYellow,
       body: Center(
@@ -40,20 +37,10 @@ class MenuPage extends StatelessWidget {
               CustomButton(
                   text: 'mga kwento',
                   onPressed: () {
-                    flutterTts.getLanguages.then((languages) {
-                      print(languages);
-                    });
-                    flutterTts.getVoices.then((languages) {
-                      print(languages);
-                    });
                     Navigator.pushNamed(context, '/library');
                   }),
               const Spacer(),
-              CustomButton(
-                  text: 'aBaKaDa',
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/dict');
-                  }),
+
               // Row(
               //   children: [
               //     CustomButton(

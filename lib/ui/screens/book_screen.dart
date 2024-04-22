@@ -27,6 +27,7 @@ class _BookScreenState extends State<BookScreen> {
 
   TTSProvider? _ttsProvider;
   int? _currentWordStart, _currentWordEnd;
+  bool isTalking = false;
 
   final SttProvider _sttProvider = SttProvider();
   String wordsSpoken = "";
@@ -36,8 +37,27 @@ class _BookScreenState extends State<BookScreen> {
   void initState() {
     super.initState();
     book = widget.book;
+
     _ttsProvider = TTSProvider(
         LANGUAGE_VOICES[book.language]!, LANGUAGE_TTS[book.language]!);
+
+    _ttsProvider!.flutterTts.setProgressHandler(
+      (text, start, end, word) {
+        setState(() {
+          _currentWordStart = start;
+          _currentWordEnd = end;
+        });
+      },
+    );
+
+    _ttsProvider!.flutterTts.setCompletionHandler(() {
+      setState(() {
+        _currentWordStart = null;
+        _currentWordEnd = null;
+        isTalking = false;
+      });
+    });
+
     _fetchBookPages();
   }
 
@@ -91,6 +111,9 @@ class _BookScreenState extends State<BookScreen> {
         ),
       ),
       body: PageView.builder(
+        physics: (isListening || isTalking)
+            ? const NeverScrollableScrollPhysics()
+            : const AlwaysScrollableScrollPhysics(),
         onPageChanged: (index) {
           setState(() {
             _currentPage = pages[index];
@@ -101,6 +124,25 @@ class _BookScreenState extends State<BookScreen> {
           final page = pages[index];
           return Column(
             children: [
+              (page.photo != null)
+                  ? Expanded(
+                      flex: 1,
+                      child: Container(
+                        constraints:
+                            const BoxConstraints.expand(width: double.infinity),
+                        child: Card(
+                          margin: const EdgeInsets.all(10.0),
+                          elevation: 4.0,
+                          child: Image.memory(
+                            page.photo!,
+                            fit: BoxFit.fitHeight,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Container(
+                      height: 1,
+                    ),
               Expanded(
                 child: Container(
                   constraints:
@@ -190,50 +232,121 @@ class _BookScreenState extends State<BookScreen> {
           );
         },
       ),
-      floatingActionButton: (isMakinig)
-          ? CustomFloatingAction(
-              btnColor: ConstantUI.customBlue,
-              btnIcon: const Icon(
-                Icons.volume_up_rounded,
-                color: Colors.white,
-                size: 50,
-              ),
-              onPressed: () {
-                _ttsProvider!.flutterTts.setCompletionHandler(() {
-                  setState(() {
-                    _currentWordStart = null;
-                    _currentWordEnd = null;
-                  });
-                });
-
-                _ttsProvider!.flutterTts.setProgressHandler(
-                  (text, start, end, word) {
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          (isTalking)
+              ? CustomFloatingAction(
+                  btnColor: (isTalking)
+                      ? ConstantUI.customPink
+                      : ConstantUI.customBlue,
+                  btnIcon: Icon(
+                    (isTalking)
+                        ? Icons.pause_rounded
+                        : Icons.play_arrow_rounded,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                  onPressed: () {
                     setState(() {
-                      _currentWordStart = start;
-                      _currentWordEnd = end;
+                      isTalking = !isTalking;
                     });
+
+                    _ttsProvider!.pause();
                   },
-                );
-                _ttsProvider!.speak(_currentPage.content);
-              },
-            )
-          : CustomFloatingAction(
-              btnColor: (!isListening)
-                  ? ConstantUI.customYellow
-                  : ConstantUI.customPink,
-              btnIcon: Icon(
-                (!isListening) ? Icons.mic : Icons.mic_off,
-                color: Colors.white,
-                size: 50,
-              ),
-              onPressed: () {
-                setState(() {
-                  isListening = !isListening;
-                });
-                if (isListening) _startListening();
-                if (!isListening) _stopListening();
-              },
-            ),
+                )
+              : Container(
+                  height: 0,
+                  width: 0,
+                ),
+          Container(
+            height: 10,
+            width: 0,
+          ),
+          (isMakinig)
+              ? CustomFloatingAction(
+                  btnColor: (isTalking)
+                      ? ConstantUI.customYellow
+                      : ConstantUI.customBlue,
+                  btnIcon: Icon(
+                    (isTalking)
+                        ? Icons.replay_rounded
+                        : Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isTalking = true;
+                    });
+
+                    _ttsProvider!.speak(_currentPage.content);
+                  },
+                )
+              : CustomFloatingAction(
+                  btnColor: (!isListening)
+                      ? ConstantUI.customYellow
+                      : ConstantUI.customPink,
+                  btnIcon: Icon(
+                    (!isListening) ? Icons.mic : Icons.mic_off,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      isListening = !isListening;
+                    });
+                    if (isListening) _startListening();
+                    if (!isListening) _stopListening();
+                  },
+                ),
+        ],
+      ),
+
+      // (isMakinig)
+      //     ? CustomFloatingAction(
+      //         btnColor: ConstantUI.customBlue,
+      //         btnIcon: const Icon(
+      //           Icons.volume_up_rounded,
+      //           color: Colors.white,
+      //           size: 50,
+      //         ),
+      //         onPressed: () {
+      //           _ttsProvider!.flutterTts.setCompletionHandler(() {
+      //             setState(() {
+      //               _currentWordStart = null;
+      //               _currentWordEnd = null;
+      //             });
+      //           });
+
+      //           _ttsProvider!.flutterTts.setProgressHandler(
+      //             (text, start, end, word) {
+      //               setState(() {
+      //                 _currentWordStart = start;
+      //                 _currentWordEnd = end;
+      //               });
+      //             },
+      //           );
+      //           _ttsProvider!.speak(_currentPage.content);
+      //         },
+      //       )
+      //     : CustomFloatingAction(
+      //         btnColor: (!isListening)
+      //             ? ConstantUI.customYellow
+      //             : ConstantUI.customPink,
+      //         btnIcon: Icon(
+      //           (!isListening) ? Icons.mic : Icons.mic_off,
+      //           color: Colors.white,
+      //           size: 50,
+      //         ),
+      //         onPressed: () {
+      //           setState(() {
+      //             isListening = !isListening;
+      //           });
+      //           if (isListening) _startListening();
+      //           if (!isListening) _stopListening();
+      //         },
+      //       ),
     );
   }
 }

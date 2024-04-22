@@ -1,13 +1,17 @@
 import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
+import 'package:basa_proj_app/shared/constants.dart';
+import 'package:basa_proj_app/shared/constant_ui.dart';
+import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:basa_proj_app/shared/constants.dart';
-import 'package:basa_proj_app/shared/constant_ui.dart';
-import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
+
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 class BookCreateScreen extends StatefulWidget {
   final List<XFile> photos;
@@ -105,10 +109,23 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                               text: snapshot.data![index]));
                           return Padding(
                             padding: const EdgeInsets.all(10),
-                            child: CustomTextField(
-                              hintText: "Page ${index + 1}",
-                              controller: _bookContentControllers[index],
-                              isTextArea: true,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 1,
+                                  child: Image.file(
+                                    File(widget.photos[index].path),
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 4,
+                                  child: CustomTextField(
+                                    hintText: "Page ${index + 1}",
+                                    controller: _bookContentControllers[index],
+                                    isTextArea: true,
+                                  ),
+                                ),
+                              ],
                             ),
                           );
 
@@ -183,8 +200,11 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
               pageCount: _bookContentControllers.length,
             );
 
-            bookProvider.addBook(bookToCreate,
-                _bookContentControllers.map((e) => e.text).toList());
+            bookProvider.addBook(
+              bookToCreate,
+              _bookContentControllers.map((e) => e.text).toList(),
+              widget.photos,
+            );
           },
         )
 

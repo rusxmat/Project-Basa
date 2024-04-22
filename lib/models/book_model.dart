@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 class Book {
   int? id;
   String title;
@@ -39,12 +41,14 @@ class BookPage {
   int bookId;
   int pageNumber;
   String content;
+  Uint8List? photo;
 
   BookPage({
     this.id,
     required this.bookId,
     required this.pageNumber,
     required this.content,
+    this.photo,
   });
 
   Map<String, dynamic> toMap() {
@@ -53,6 +57,7 @@ class BookPage {
       'bookId': bookId,
       'pageNumber': pageNumber,
       'content': content,
+      'photo': photo,
     };
   }
 
@@ -62,6 +67,7 @@ class BookPage {
       bookId: map['bookId'],
       pageNumber: map['pageNumber'],
       content: map['content'],
+      photo: map['photo'],
     );
   }
 }

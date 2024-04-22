@@ -1,8 +1,11 @@
 import 'dart:io';
+import 'package:basa_proj_app/ui/modals/message_modal.dart';
 import 'package:basa_proj_app/ui/screens/book_create_screen.dart';
+import 'package:basa_proj_app/ui/widgets/custom_buttons_widget.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:reorderable_grid_view/reorderable_grid_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
@@ -77,6 +80,7 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                   ))
               : Container(),
           IconButton(
+            disabledColor: Colors.grey,
             icon: (!isSelecting)
                 ? const Icon(
                     Icons.select_all,
@@ -86,65 +90,128 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                     Icons.close,
                     color: ConstantUI.customYellow,
                   ),
-            onPressed: () {
-              setState(() {
-                isSelecting = !isSelecting; // Toggle the selection mode
-              });
-            },
+            onPressed: (photos.isNotEmpty)
+                ? () {
+                    setState(() {
+                      isSelecting = !isSelecting; // Toggle the selection mode
+                    });
+                  }
+                : null,
           ),
         ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 5),
-        child: ReorderableGridView.count(
-          dragEnabled: !isSelecting,
-          crossAxisCount: 3,
-          crossAxisSpacing: 4,
-          mainAxisSpacing: 4,
-          children: List.generate(
-            photos.length,
-            (index) {
-              return GestureDetector(
-                key: ValueKey(photos[index]),
-                onTap: (isSelecting)
-                    ? () {
-                        setState(() {
-                          selectedPhotos[index] = !selectedPhotos[index];
-                        });
-                      }
-                    : null,
-                child: Image.file(
-                  File(photos[index].path),
-                  fit: BoxFit.cover,
-                  opacity: AlwaysStoppedAnimation(
-                      ((isSelecting && selectedPhotos[index]) || !isSelecting)
-                          ? 1.0
-                          : 0.5),
+        child: (photos.isNotEmpty)
+            ? ReorderableGridView.count(
+                dragEnabled: !isSelecting,
+                crossAxisCount: 3,
+                crossAxisSpacing: 4,
+                mainAxisSpacing: 4,
+                children: List.generate(
+                  photos.length,
+                  (index) {
+                    return GestureDetector(
+                      key: ValueKey(photos[index]),
+                      onTap: (isSelecting)
+                          ? () {
+                              setState(() {
+                                selectedPhotos[index] = !selectedPhotos[index];
+                              });
+                            }
+                          : null,
+                      child: Image.file(
+                        File(photos[index].path),
+                        fit: BoxFit.cover,
+                        opacity: AlwaysStoppedAnimation(
+                            ((isSelecting && selectedPhotos[index]) ||
+                                    !isSelecting)
+                                ? 1.0
+                                : 0.5),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-          onReorder: (oldIndex, newIndex) {
-            setState(
-              () {
-                final element = photos.removeAt(oldIndex);
-                photos.insert(newIndex, element);
-              },
-            );
-          },
-        ),
+                onReorder: (oldIndex, newIndex) {
+                  setState(
+                    () {
+                      final element = photos.removeAt(oldIndex);
+                      photos.insert(newIndex, element);
+                    },
+                  );
+                },
+              )
+            : Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Card(
+                    child: ListTile(
+                      title: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 60),
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          text: const TextSpan(
+                            children: [
+                              TextSpan(
+                                text: 'Walang mga larawan\n',
+                                style: TextStyle(
+                                  color: ConstantUI.customPink,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  fontFamily: ITIM_FONTNAME,
+                                ),
+                              ),
+                              TextSpan(
+                                text:
+                                    'Magdagdag ng mga larawan mula sa Camera Screen',
+                                style: TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 16,
+                                  fontFamily: ITIM_FONTNAME,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 30, vertical: 20),
+                        child: CustomButton(
+                          text: 'Bumalik sa Ibasa',
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
       ),
       floatingActionButton: CustomFloatingAction(
-        btnIcon: FORWARD_ICON,
+        btnIcon: (photos.isEmpty) ? DISABLED_ICON : FORWARD_ICON,
+        isDisabled: (photos.isEmpty),
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => BookCreateScreen(
-                photos: photos,
+          if (photos.isNotEmpty) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => BookCreateScreen(
+                  photos: photos,
+                ),
               ),
-            ),
-          );
+            );
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) => MessageModal(
+                message:
+                    "Walang mga kuhang larawan. Bumalik sa Camera Screen at kumuha ng mga larawan. ",
+              ),
+            );
+          }
         },
         btnColor: Colors.white,
       ),
