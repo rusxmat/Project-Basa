@@ -1,10 +1,12 @@
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/shared/constants.dart';
+import 'package:basa_proj_app/ui/modals/confirm_delete_modal.dart';
+import 'package:basa_proj_app/ui/modals/edit_book_modal.dart';
 import 'package:basa_proj_app/ui/modals/mode_choice_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/models/book_model.dart';
-import 'package:basa_proj_app/ui/screens/book_screen.dart';
+import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   @override
@@ -15,12 +17,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
   BookProvider _bookProvider = BookProvider();
   List<Book> _books = [];
 
-  @override
-  void initState() {
-    super.initState();
-    _fetchBooks();
-  }
-
   Future<void> _fetchBooks() async {
     List<Book> books = await _bookProvider.getAllBooks();
     setState(() {
@@ -30,6 +26,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final BookProvider _bookProvider = Provider.of<BookProvider>(context);
+    _fetchBooks();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -73,12 +72,19 @@ class _LibraryScreenState extends State<LibraryScreen> {
               trailing: PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'edit') {
-                    // Handle edit action
+                    showDialog(
+                      context: context,
+                      builder: (context) => EditBookModal(
+                        book: book,
+                      ),
+                    );
                   } else if (value == 'delete') {
-                    _bookProvider.deleteBook(book.id!);
-                    setState(() {
-                      _books.removeAt(index);
-                    });
+                    showDialog(
+                      context: context,
+                      builder: (context) => ConfirmDeleteModal(
+                        bookId: book.id!,
+                      ),
+                    );
                   }
                 },
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[

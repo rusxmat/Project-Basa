@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:basa_proj_app/services/book_service.dart';
 import 'package:basa_proj_app/shared/image_util.dart';
 import 'package:camera/camera.dart';
@@ -7,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:basa_proj_app/models/book_model.dart';
-import 'package:image/image.dart';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseHelper db = DatabaseHelper();
@@ -78,6 +75,11 @@ class BookProvider extends ChangeNotifier {
   Future<void> deleteBook(int bookId) async {
     await db.deleteBookPagesByBookId(bookId);
     await db.deleteBook(bookId);
+    notifyListeners();
+  }
+
+  Future<void> updateBook(BookEdit book, int bookId) async {
+    await db.updateBook(book, bookId);
     notifyListeners();
   }
 

@@ -33,7 +33,7 @@ class NoPhotosWarningCard extends StatelessWidget {
                     TextSpan(
                       text: 'Magdagdag ng mga larawan mula sa Camera Screen',
                       style: TextStyle(
-                        color: Colors.grey,
+                        color: ConstantUI.customGrey,
                         fontSize: 16,
                         fontFamily: ITIM_FONTNAME,
                       ),

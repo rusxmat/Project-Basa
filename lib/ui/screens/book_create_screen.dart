@@ -8,6 +8,7 @@ import 'package:basa_proj_app/shared/constants.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
 import 'package:basa_proj_app/ui/widgets/nophotos_warning_card.dart';
+import 'package:basa_proj_app/shared/input_validation_util.dart';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -39,8 +40,6 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   void initState() {
     bookProvider = Provider.of<BookProvider>(context, listen: false);
     _future = bookProvider!.ocrBookPhotos(widget.photos);
-    _bookContentControllers =
-        List.generate(widget.photos.length, (index) => TextEditingController());
     super.initState();
     // photos = widget.photos;
   }
@@ -53,47 +52,20 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
     super.dispose();
   }
 
-  String? get _errorTextBookTitle {
-    final text = _titleController.value.text;
+  bool get _isInputValid =>
+      isInputValidBookTitle(_titleController.text) &&
+      isInputValidBookAuthor(_authorController.text) &&
+      _bookContentControllers
+          .every((controller) => isInputValidBookContent(controller.text));
 
-    if (text.isEmpty) {
-      return 'Maglagay ng Pamagat ng Libro';
-    }
-    if (text.length < 3) {
-      return 'Ang Pamagat ng Libro ay dapat na may 3 o higit pang mga titik';
-    }
-    if (text.length > 20) {
-      return 'Ang Pamagat ng Libro ay dapat na hindi hihigit sa 20 na titik';
-    }
+  String? get _errorTextBookTitle =>
+      errorTextBookTitle(_titleController.value.text);
 
-    return null;
-  }
-
-  String? get _errorTextBookAuthor {
-    final text = _authorController.value.text;
-
-    if (text.isEmpty) {
-      return null;
-    }
-
-    if (text.length < 3) {
-      return 'Ang Pangalan ng Awtor ay dapat na may 3 o higit pang mga titik';
-    }
-    if (text.length > 20) {
-      return 'Ang Pangalan ng Awtor ay dapat na hindi hihigit sa 20 na titik';
-    }
-
-    return null;
-  }
+  String? get _errorTextBookAuthor =>
+      errorTextBookAuthor(_authorController.value.text);
 
   String? _errorTextBookContent(TextEditingController bookContentController) {
-    final text = bookContentController.value.text;
-
-    if (text.isEmpty) {
-      return 'Ang Pahina ng libro ay hindi maaaring walang laman';
-    }
-
-    return null;
+    return errorTextBookContent(bookContentController.value.text);
   }
 
   void _submitBook() {
@@ -124,26 +96,6 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
         context,
         MaterialPageRoute(builder: (context) => LibraryScreen()),
         ModalRoute.withName("/"));
-  }
-
-  bool get _isInputValid {
-    if (_titleController.value.text.isEmpty ||
-        _titleController.value.text.length < 3 ||
-        _titleController.value.text.length > 20) {
-      return false;
-    }
-
-    if (_authorController.value.text.isNotEmpty &&
-        (_authorController.value.text.length < 3 ||
-            _authorController.value.text.length > 20)) {
-      return false;
-    }
-
-    if (_bookContentControllers.any((element) => element.value.text.isEmpty)) {
-      return false;
-    }
-
-    return true;
   }
 
   @override
@@ -191,6 +143,10 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                   return Text('Error: ${snapshot.error}');
                 } else {
                   List<String> bookContent = snapshot.data!;
+                  _bookContentControllers = List.generate(
+                      widget.photos.length,
+                      (index) =>
+                          TextEditingController(text: bookContent[index]));
 
                   return ListView.builder(
                     itemCount: widget.photos.length + 1,
@@ -247,16 +203,12 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                                   },
                                 ),
                               ),
-                              Column(
-                                children: contentFields,
-                              )
                             ],
                           ),
                         );
                       }
 
                       index--;
-                      _bookContentControllers[index].text = bookContent[index];
 
                       return Card(
                         shape: RoundedRectangleBorder(
@@ -348,64 +300,6 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                       );
                     }),
                   );
-
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(
-                  //       horizontal: 8.0, vertical: 5),
-                  //   child: SingleChildScrollView(
-                  //     child: AnimatedBuilder(
-                  //       animation: Listenable.merge([
-                  //         _titleController,
-                  //         _authorController,
-                  //       ]),
-                  //       builder: (context, _) {
-                  //         return Column(
-                  //           children: [
-                  //             Padding(
-                  //               padding: const EdgeInsets.all(10),
-                  //               child: CustomTextField(
-                  //                 hintText: 'Title',
-                  //                 controller: _titleController,
-                  //                 errorText:
-                  //                     _submitted ? _errorTextBookTitle : null,
-                  //               ),
-                  //             ),
-                  //             Padding(
-                  //               padding: const EdgeInsets.all(10),
-                  //               child: CustomTextField(
-                  //                 hintText: 'Author',
-                  //                 controller: _authorController,
-                  //                 errorText:
-                  //                     _submitted ? _errorTextBookAuthor : null,
-                  //               ),
-                  //             ),
-                  //             Padding(
-                  //               padding: const EdgeInsets.all(10),
-                  //               child: ToggleSwitch(
-                  //                 minWidth: 90,
-                  //                 fontSize: 16,
-                  //                 inactiveBgColor: Colors.white,
-                  //                 inactiveFgColor: Colors.black45,
-                  //                 cornerRadius: 50,
-                  //                 initialLabelIndex: 0,
-                  //                 labels: LANGUAGE_CODES.keys.toList(),
-                  //                 onToggle: (index) {
-                  //                   _languageSelected =
-                  //                       LANGUAGE_CODES.values.toList()[index!];
-                  //                 },
-                  //               ),
-                  //             ),
-                  //             // (contentFields.isNotEmpty)
-                  //             //     ? Column(
-                  //             //         children: contentFields,
-                  //             //       )
-                  //             //     : const SizedBox()
-                  //           ],
-                  //         );
-                  //       },
-                  //     ),
-                  //   ),
-                  // ); // Column(
                 }
               },
             ),

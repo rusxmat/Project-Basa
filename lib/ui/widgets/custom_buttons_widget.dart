@@ -4,7 +4,7 @@ import 'package:basa_proj_app/shared/constant_ui.dart';
 class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
-  final IconData? icon;
+  final Icon? icon;
 
   const CustomButton({
     required this.text,
@@ -26,14 +26,14 @@ class CustomButton extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (icon != null) Icon(icon),
-          if (icon != null) SizedBox(width: 10),
+          if (icon != null) icon!,
+          if (icon != null) icon!,
           Text(
             text,
             style: TextStyle(
               fontFamily: ITIM_FONTNAME,
               color: Colors.white,
-              fontSize: 20,
+              fontSize: 24,
             ),
           ),
         ],

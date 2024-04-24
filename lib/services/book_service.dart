@@ -69,10 +69,16 @@ class DatabaseHelper {
     return books;
   }
 
-  Future<int> updateBook(Book book) async {
+  // Future<int> updateBook(Book book, int bookId) async {
+  //   var dbClient = await db;
+  //   return await dbClient!
+  //       .update('books', book.toMap(), where: 'id = ?', whereArgs: [bookId]);
+  // }
+
+  Future<int> updateBook(BookEdit book, int bookId) async {
     var dbClient = await db;
     return await dbClient!
-        .update('books', book.toMap(), where: 'id = ?', whereArgs: [book.id]);
+        .update('books', book.toMap(), where: 'id = ?', whereArgs: [bookId]);
   }
 
   Future<int> deleteBook(int id) async {
