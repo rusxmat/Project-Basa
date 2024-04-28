@@ -33,7 +33,7 @@ class CustomButton extends StatelessWidget {
             style: TextStyle(
               fontFamily: ITIM_FONTNAME,
               color: Colors.white,
-              fontSize: 24,
+              fontSize: 20,
             ),
           ),
         ],

@@ -1,7 +1,8 @@
 import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/shared/connectivity_util.dart';
 import 'package:basa_proj_app/shared/constants.dart';
-import 'package:basa_proj_app/ui/screens/book_screen.dart';
+import 'package:basa_proj_app/ui/screens/book_stt_screen.dart';
+import 'package:basa_proj_app/ui/screens/book_tts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 
@@ -51,8 +52,7 @@ class ModeChoiceModal extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          BookScreen(book: book!, isMakinig: true),
+                      builder: (context) => BookTTSScreen(book: book!),
                     ),
                   );
                 },
@@ -94,11 +94,9 @@ class ModeChoiceModal extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BookScreen(
-                              book: book!,
-                              isMakinig: false,
-                            ),
-                          ),
+                              builder: (context) => BookSTTScreen(
+                                    book: book!,
+                                  )),
                         );
                       },
               ),

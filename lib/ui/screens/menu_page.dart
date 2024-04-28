@@ -11,10 +11,10 @@ class MenuPage extends StatelessWidget {
       backgroundColor: ConstantUI.customYellow,
       body: Center(
         child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 150, 0, 200),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Spacer(),
               const Image(
                 image: LOGO,
                 width: 100,
@@ -26,14 +26,17 @@ class MenuPage extends StatelessWidget {
                   width: 100,
                 ),
               ),
-
-              const Spacer(),
+              Container(
+                height: 20,
+              ),
               CustomButton(
                   text: 'ibàsa',
                   onPressed: () {
                     Navigator.pushNamed(context, '/ibasa');
                   }),
-              const Spacer(),
+              Container(
+                height: 20,
+              ),
               CustomButton(
                   text: 'mga kwento',
                   onPressed: () {

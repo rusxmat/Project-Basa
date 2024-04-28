@@ -13,9 +13,12 @@ class TTSProvider with ChangeNotifier {
 
   FlutterTts get flutterTts => _flutterTts;
 
-  void speak(String text) async {
+  void initTTS() async {
     await _flutterTts.setLanguage(_language);
     await _flutterTts.setVoice(_voice);
+  }
+
+  void speak(String text) async {
     await _flutterTts.speak(text);
   }
 
@@ -23,8 +26,21 @@ class TTSProvider with ChangeNotifier {
     await _flutterTts.pause();
   }
 
-  void returnProgressHandler() {
-    return _flutterTts
-        .setProgressHandler((String text, int start, int end, String word) {});
+  void stop() async {
+    await _flutterTts.stop();
+  }
+
+  void regCompletionHandler(VoidCallback completionHandler) {
+    _flutterTts.setCompletionHandler(completionHandler);
+  }
+
+  void regCancelHandler(VoidCallback cancelHandler) {
+    _flutterTts.setCancelHandler(cancelHandler);
+  }
+
+  void regProgressHandler(
+      void Function(String text, int startOffset, int endOffset, String word)
+          progressHandler) async {
+    _flutterTts.setProgressHandler(progressHandler);
   }
 }
