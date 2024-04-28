@@ -3,6 +3,7 @@ import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/providers/tts_provider.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/shared/constants.dart';
+import 'package:basa_proj_app/ui/modals/edit_book_page_modal.dart';
 import 'package:basa_proj_app/ui/widgets/custom_appbar_widget.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/ui/widgets/custom_icon_btn.dart';
@@ -24,6 +25,7 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
   late Book book = widget.book;
   late List<BookPage> pages = [];
   late BookPage _currentPage;
+  late int _currentPageIndex = 0;
   late bool ttsInitialized = false;
 
   int start = -1;
@@ -51,7 +53,7 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
     List<BookPage> bookpages = await _bookProvider.getBookPagesById(book.id!);
     setState(() {
       pages = bookpages;
-      _currentPage = pages[0];
+      _currentPage = pages[_currentPageIndex];
     });
   }
 
@@ -122,6 +124,28 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
           _ttsState = TtsState.stopped;
           Navigator.pop(context);
         },
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.edit_rounded,
+              color: (!ttsInitialized)
+                  ? ConstantUI.customYellow
+                  : ConstantUI.customGrey,
+            ),
+            onPressed: (!ttsInitialized)
+                ? () async {
+                    _ttsProvider!.stop();
+                    _resetTTS();
+                    await showDialog(
+                        context: context,
+                        builder: (context) => EditBookPageModal(
+                            bookPage: _currentPage,
+                            pageNumber: _currentPageIndex));
+                    _fetchBookPages();
+                  }
+                : null,
+          )
+        ],
       ),
       body: PageView.builder(
         physics: (_ttsState == TtsState.playing)
@@ -135,6 +159,7 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
             ttsInitialized = false;
             start = -1;
             end = -1;
+            _currentPageIndex = index;
           });
         },
         itemCount: pages.length,

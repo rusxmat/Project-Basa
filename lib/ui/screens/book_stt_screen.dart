@@ -1,8 +1,8 @@
-import 'dart:ffi';
-
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/providers/stt_provider.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
+import 'package:basa_proj_app/ui/modals/edit_book_page_modal.dart';
+import 'package:basa_proj_app/ui/widgets/custom_appbar_widget.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/models/book_model.dart';
@@ -27,6 +27,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
   String wordsSpoken = "";
   bool hasListened = false;
   int lastDetectedTextSize = 1;
+  int _currentPageIndex = 0;
   List<String> spokenWords = [];
 
   @override
@@ -70,14 +71,22 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     }
   }
 
+  List<String> getReferenceWords() {
+    return _currentPage.content
+        .trim()
+        .split(RegExp(r"[^-'\w]+"))
+        .map((e) =>
+            e.replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '').toLowerCase())
+        .where((element) => element.isNotEmpty)
+        .toList();
+  }
+
   Future<void> _fetchBookPages() async {
     List<BookPage> bookpages = await _bookProvider.getBookPagesById(book.id!);
     setState(() {
       pages = bookpages;
       _currentPage = pages[0];
-      referenceWords = _currentPage.content.split(RegExp(r"[^-'\w]+")).map((e) {
-        return e.replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '').toLowerCase();
-      }).toList();
+      referenceWords = getReferenceWords();
     });
   }
 
@@ -182,8 +191,6 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
       if (spokenWord == referenceWord) score++;
     }
 
-    print(referenceWords);
-
     double scorePercentage = ((score / (referenceWords.length)) * 100);
 
     return Card(
@@ -207,24 +214,35 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: ConstantUI.customYellow,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        backgroundColor: ConstantUI.customBlue,
-        title: Text(
-          book.title,
-          style: const TextStyle(
-            fontFamily: ITIM_FONTNAME,
-            color: Colors.white,
-          ),
-        ),
+      appBar: CustomAppBarWidget(
+        title: book.title,
+        onPressedArrowBack: () {
+          _stopListening();
+          reset();
+          Navigator.pop(context);
+        },
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.edit_rounded,
+              color: (!hasListened)
+                  ? ConstantUI.customYellow
+                  : ConstantUI.customGrey,
+            ),
+            onPressed: (!hasListened)
+                ? () async {
+                    _stopListening();
+                    reset();
+                    await showDialog(
+                        context: context,
+                        builder: (context) => EditBookPageModal(
+                            bookPage: _currentPage,
+                            pageNumber: _currentPageIndex));
+                    _fetchBookPages();
+                  }
+                : null,
+          )
+        ],
       ),
       body: PageView.builder(
         physics: (isListening)
@@ -234,14 +252,8 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
           reset();
           setState(() {
             _currentPage = pages[index];
-            referenceWords =
-                _currentPage.content.split(RegExp(r"[^-'\w]+")).map(
-              (e) {
-                return e
-                    .replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '')
-                    .toLowerCase();
-              },
-            ).toList();
+            _currentPageIndex = index;
+            referenceWords = getReferenceWords();
           });
         },
         itemCount: pages.length,
@@ -330,7 +342,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
                       ),
                     )
                   : EMPTY_SPACE,
-              (hasListened && !isListening)
+              (hasListened && !isListening && spokenWords.isNotEmpty)
                   ? Expanded(
                       flex: 2,
                       child: _getScore(),
@@ -360,20 +372,21 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
           (hasListened) ? const SizedBox(height: 10.0) : EMPTY_SPACE,
           CustomFloatingAction(
             btnColor:
-                (!isListening) ? ConstantUI.customBlue : ConstantUI.customPink,
+                (!hasListened) ? ConstantUI.customBlue : ConstantUI.customPink,
             btnIcon: Icon(
-              (!isListening) ? Icons.mic : Icons.mic_off,
+              (!hasListened) ? Icons.mic : Icons.exit_to_app_rounded,
               color: Colors.white,
               size: 50,
             ),
             onPressed: () {
-              if (!isListening) {
+              if (!hasListened) {
                 _startListening();
                 setState(() {
                   hasListened = true;
                 });
               } else {
                 _stopListening();
+                reset();
               }
             },
           ),

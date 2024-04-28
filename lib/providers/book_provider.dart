@@ -83,6 +83,11 @@ class BookProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateBookPage(BookPageEdit bookPage, int bookPageId) async {
+    await db.updateBookPage(bookPage, bookPageId);
+    notifyListeners();
+  }
+
   // // Read a specific book by its index
   // Book getBook(int index) {
   //   if (index >= 0 && index < books.length) {
