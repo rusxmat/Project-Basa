@@ -82,7 +82,7 @@ class _IbasaScreenState extends State<IbasaScreen>
   @override
   Widget build(BuildContext context) {
     if (_initializeControllerFuture == null) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: CIRCULAR_PROGRESS_INDICATOR);
     }
 
     return Scaffold(
@@ -122,11 +122,10 @@ class _IbasaScreenState extends State<IbasaScreen>
             child: FadeTransition(
               opacity: _captureAnimation!,
               child: Container(
-                width: 80.0,
-                height: 80.0,
+                width: double.infinity,
+                height: double.infinity,
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.8),
-                  borderRadius: BorderRadius.circular(50.0),
                 ),
               ),
             ),

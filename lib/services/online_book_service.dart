@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/models/book_page_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -33,5 +34,18 @@ class OnlineBookService {
       }
     }
     return bookPages;
+  }
+
+  Future<List<Uint8List>> downloadBookPhotos(
+      List<String> imageFileNames) async {
+    List<Uint8List> photos = [];
+
+    for (int i = 0; i < imageFileNames.length; i++) {
+      photos.add(await supabase!.storage
+          .from('book-pages-photo')
+          .download(imageFileNames[i]));
+    }
+
+    return photos;
   }
 }

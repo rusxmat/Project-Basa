@@ -17,3 +17,15 @@ Future<Uint8List> convertAndCompressImage(XFile imageFile) async {
 
   return compressedUint8List;
 }
+
+Future<Uint8List> compressImage(Uint8List imageBytes) async {
+  img.Image? image = img.decodeImage(imageBytes);
+
+  img.Image compressedImage = img.copyResize(image!, width: 500);
+
+  List<int> compressedBytes = img.encodeJpg(compressedImage, quality: 80);
+
+  Uint8List compressedUint8List = Uint8List.fromList(compressedBytes);
+
+  return compressedUint8List;
+}

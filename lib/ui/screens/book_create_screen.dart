@@ -137,7 +137,7 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                   (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   // If the Future is still processing, show a loading spinner
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: CIRCULAR_PROGRESS_INDICATOR);
                 } else if (snapshot.hasError) {
                   // If the Future completed with an error, show an error message
                   return Text('Error: ${snapshot.error}');

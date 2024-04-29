@@ -5,11 +5,13 @@ class CustomButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
   final Icon? icon;
+  final double textSize;
 
   const CustomButton({
     required this.text,
     required this.onPressed,
     this.icon,
+    this.textSize = 20,
   });
 
   @override
@@ -33,7 +35,7 @@ class CustomButton extends StatelessWidget {
             style: TextStyle(
               fontFamily: ITIM_FONTNAME,
               color: Colors.white,
-              fontSize: 20,
+              fontSize: textSize,
             ),
           ),
         ],

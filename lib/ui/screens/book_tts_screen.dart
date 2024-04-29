@@ -216,7 +216,7 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
                               return child;
                             } else {
                               return const Center(
-                                child: CircularProgressIndicator(),
+                                child: CIRCULAR_PROGRESS_INDICATOR,
                               );
                             }
                           },

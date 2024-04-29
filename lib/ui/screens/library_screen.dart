@@ -1,9 +1,12 @@
+import 'package:basa_proj_app/shared/connectivity_util.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/modals/confirm_delete_modal.dart';
 import 'package:basa_proj_app/ui/modals/edit_book_modal.dart';
+import 'package:basa_proj_app/ui/modals/message_modal.dart';
 import 'package:basa_proj_app/ui/modals/mode_choice_modal.dart';
 import 'package:basa_proj_app/ui/widgets/book_card.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
+import 'package:basa_proj_app/ui/widgets/nobooks_warning_card.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/models/book_model.dart';
@@ -15,13 +18,19 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> {
   final BookProvider _bookProvider = BookProvider();
+  List<Book> books = [];
 
-  Future<List<Book>> _fetchBooks() async {
-    return await _bookProvider.getAllBooks();
+  void _fetchBooks() async {
+    List<Book> futureBooks = await _bookProvider.getAllBooks();
+    setState(() {
+      books = futureBooks;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    _fetchBooks();
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -42,21 +51,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
       ),
-      body: FutureBuilder<List<Book>>(
-        future: _fetchBooks(),
-        builder: (BuildContext context, AsyncSnapshot<List<Book>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error: ${snapshot.error}'),
-            );
-          } else {
-            final List<Book> books = snapshot.data!;
-
-            return ListView.builder(
+      body: (books.isEmpty)
+          ? const NoBooksWarningCard()
+          : ListView.builder(
               padding: const EdgeInsets.all(10),
               itemCount: books.length,
               itemBuilder: (context, index) {
@@ -104,17 +101,24 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   },
                 );
               },
-            );
-          }
-        },
-      ),
+            ),
       floatingActionButton: CustomFloatingAction(
         icon: Icons.download_rounded,
         iconSize: 30,
         btnColor: ConstantUI.customBlue,
         extendedText: "Online Library",
-        onPressed: () {
-          Navigator.pushNamed(context, '/onlinelib');
+        onPressed: () async {
+          if (await isConnectedToInternet()) {
+            Navigator.pushNamed(context, '/onlinelib');
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) => const MessageModal(
+                  title: "No Internet Connection",
+                  message:
+                      'Please connect to the internet to access the online library. \n\nThank you!'),
+            );
+          }
         },
       ),
     );

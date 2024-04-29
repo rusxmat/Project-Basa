@@ -42,3 +42,8 @@ const EMPTY_SPACE = SizedBox(
   height: 0,
   width: 0,
 );
+
+const CircularProgressIndicator CIRCULAR_PROGRESS_INDICATOR =
+    CircularProgressIndicator(
+  valueColor: AlwaysStoppedAnimation<Color>(ConstantUI.customBlue),
+);
