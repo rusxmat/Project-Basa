@@ -4,7 +4,11 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+
 import 'package:basa_proj_app/models/book_model.dart';
+import 'package:basa_proj_app/models/book_edit_model.dart';
+import 'package:basa_proj_app/models/book_page_edit_model.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 
 class BookProvider extends ChangeNotifier {
   final DatabaseHelper db = DatabaseHelper();

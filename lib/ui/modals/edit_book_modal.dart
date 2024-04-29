@@ -7,6 +7,7 @@ import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:toggle_switch/toggle_switch.dart';
+import 'package:basa_proj_app/models/book_edit_model.dart';
 
 class EditBookModal extends StatefulWidget {
   final Book book;

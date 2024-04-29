@@ -7,7 +7,9 @@ import 'package:basa_proj_app/ui/modals/edit_book_page_modal.dart';
 import 'package:basa_proj_app/ui/widgets/custom_appbar_widget.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/ui/widgets/custom_icon_btn.dart';
+import 'package:basa_proj_app/ui/widgets/page_image_display.dart';
 import 'package:flutter/material.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 
 enum TtsState { playing, paused, stopped }
 
@@ -171,19 +173,10 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
             children: [
               Expanded(
                 flex: 3,
-                child: Container(
-                  constraints:
-                      const BoxConstraints.expand(width: double.infinity),
-                  child: Card(
-                    margin: const EdgeInsets.all(10.0),
-                    elevation: 4.0,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Image.memory(
-                        page.photo!,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                child: PageImageDisplay(
+                  image: Image.memory(
+                    page.photo!,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),

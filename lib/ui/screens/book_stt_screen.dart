@@ -4,8 +4,11 @@ import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/modals/edit_book_page_modal.dart';
 import 'package:basa_proj_app/ui/widgets/custom_appbar_widget.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
+import 'package:basa_proj_app/ui/widgets/page_content_card.dart';
+import 'package:basa_proj_app/ui/widgets/page_image_display.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/models/book_model.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 
 class BookSTTScreen extends StatefulWidget {
   final Book book;
@@ -265,50 +268,18 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
             children: [
               Expanded(
                 flex: 3,
-                child: Container(
-                  constraints:
-                      const BoxConstraints.expand(width: double.infinity),
-                  child: Card(
-                    margin: const EdgeInsets.all(10.0),
-                    elevation: 4.0,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10.0),
-                      child: Image.memory(
-                        page.photo!,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
+                child: PageImageDisplay(
+                  image: Image.memory(
+                    page.photo!,
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
               Expanded(
                 flex: 5,
-                child: Card(
-                  margin: const EdgeInsets.all(10.0),
-                  elevation: 4.0,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Page ${page.pageNumber}',
-                          style: const TextStyle(
-                              fontSize: 20.0, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16.0),
-                        Text(
-                          page.content,
-                          style: const TextStyle(
-                            fontSize: 20.0,
-                            color: Colors.black,
-                            fontFamily: ITIM_FONTNAME,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                child: PageContentCard(
+                  pageContent: page.content,
+                  pageNumber: page.pageNumber,
                 ),
               ),
               (hasListened)

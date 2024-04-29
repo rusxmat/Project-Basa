@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:basa_proj_app/models/book_model.dart';
+import 'package:basa_proj_app/models/book_edit_model.dart';
+import 'package:basa_proj_app/models/book_page_edit_model.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper _instance = DatabaseHelper.internal();
@@ -61,7 +64,7 @@ class DatabaseHelper {
     var dbClient = await db;
     List<Map> maps = await dbClient!.query('books');
     List<Book> books = [];
-    if (maps.length > 0) {
+    if (maps.isNotEmpty) {
       for (int i = 0; i < maps.length; i++) {
         books.add(Book.fromMap(maps[i] as Map<String, dynamic>));
       }

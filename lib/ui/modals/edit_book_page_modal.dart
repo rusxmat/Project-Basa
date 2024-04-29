@@ -1,10 +1,11 @@
-import 'package:basa_proj_app/models/book_model.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/shared/input_validation_util.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:basa_proj_app/models/book_page_edit_model.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 
 class EditBookPageModal extends StatefulWidget {
   final int pageNumber;
