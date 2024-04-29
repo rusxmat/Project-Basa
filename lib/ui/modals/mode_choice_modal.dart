@@ -8,8 +8,9 @@ import 'package:basa_proj_app/shared/constant_ui.dart';
 
 class ModeChoiceModal extends StatelessWidget {
   final Book? book;
+  final bool fromOnline;
 
-  ModeChoiceModal({super.key, required this.book});
+  ModeChoiceModal({super.key, required this.book, required this.fromOnline});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +53,8 @@ class ModeChoiceModal extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BookTTSScreen(book: book!),
+                      builder: (context) =>
+                          BookTTSScreen(book: book!, fromOnline: fromOnline),
                     ),
                   );
                 },
@@ -96,6 +98,7 @@ class ModeChoiceModal extends StatelessWidget {
                           MaterialPageRoute(
                               builder: (context) => BookSTTScreen(
                                     book: book!,
+                                    fromOnline: fromOnline,
                                   )),
                         );
                       },

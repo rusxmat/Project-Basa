@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:basa_proj_app/models/book_model.dart';
+import 'package:basa_proj_app/models/book_page_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:basa_proj_app/models/online_book_page_model.dart';
 
-class OnlineLibraryService {
+class OnlineBookService {
   SupabaseClient? supabase;
 
-  OnlineLibraryService() {
+  OnlineBookService() {
     supabase = Supabase.instance.client;
   }
 
@@ -22,14 +22,14 @@ class OnlineLibraryService {
     return books;
   }
 
-  Future<List<OnlineBookPage>> getBookPagesById(int bookId) async {
+  Future<List<BookPage>> getBookPagesById(int bookId) async {
     List<Map> maps =
         await supabase!.from('bookPages').select().eq('bookId', bookId);
 
-    List<OnlineBookPage> bookPages = [];
+    List<BookPage> bookPages = [];
     if (maps.isNotEmpty) {
       for (int i = 0; i < maps.length; i++) {
-        bookPages.add(OnlineBookPage.fromMap(maps[i] as Map<String, dynamic>));
+        bookPages.add(BookPage.fromMap(maps[i] as Map<String, dynamic>));
       }
     }
     return bookPages;

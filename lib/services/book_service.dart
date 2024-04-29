@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:basa_proj_app/models/book_page_local_model.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:basa_proj_app/models/book_model.dart';
@@ -83,7 +84,7 @@ class DatabaseHelper {
     return await dbClient!.delete('books', where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> createBookPage(BookPage bookPage) async {
+  Future<int> createBookPage(BookPageLocal bookPage) async {
     var dbClient = await db;
     return await dbClient!.insert('book_pages', bookPage.toMap());
   }

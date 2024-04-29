@@ -1,4 +1,5 @@
 import 'package:basa_proj_app/providers/book_provider.dart';
+import 'package:basa_proj_app/providers/online_book_provider.dart';
 import 'package:basa_proj_app/providers/stt_provider.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/modals/edit_book_page_modal.dart';
@@ -12,33 +13,76 @@ import 'package:basa_proj_app/models/book_page_model.dart';
 
 class BookSTTScreen extends StatefulWidget {
   final Book book;
+  final bool fromOnline;
 
-  BookSTTScreen({super.key, required this.book});
+  BookSTTScreen({super.key, required this.book, this.fromOnline = false});
 
   @override
   _BookSTTScreenState createState() => _BookSTTScreenState();
 }
 
 class _BookSTTScreenState extends State<BookSTTScreen> {
-  final BookProvider _bookProvider = BookProvider();
-  late Book book = widget.book;
-  List<BookPage> pages = [];
-  late BookPage _currentPage;
+  late BookProvider _bookProvider;
+  late OnlineBookProvider _onlineBookProvider;
+
   final SttProvider _sttProvider = SttProvider();
 
+  late Book book;
+  late bool fromOnline;
+
+  late BookPage currentPage;
+  int currentPageIndex = 0;
+  List<BookPage> pages = [];
   List<String> referenceWords = [];
+
   String wordsSpoken = "";
+  List<String> spokenWords = [];
+
   bool hasListened = false;
   int lastDetectedTextSize = 1;
-  int _currentPageIndex = 0;
-  List<String> spokenWords = [];
+
+  bool get isListening => _sttProvider.isListening;
+
+  Future<void> _fetchBookPages() async {
+    List<BookPage> bookpages = [];
+
+    if (fromOnline) {
+      bookpages = await _onlineBookProvider.getBookPagesById(book.id!);
+    } else {
+      bookpages = await _bookProvider.getBookPagesById(book.id!);
+    }
+
+    setState(() {
+      pages = bookpages;
+      currentPage = pages[currentPageIndex];
+      referenceWords = getReferenceWords();
+    });
+  }
 
   @override
   void initState() {
     super.initState();
+
+    fromOnline = widget.fromOnline;
     book = widget.book;
 
+    if (fromOnline) {
+      _onlineBookProvider = OnlineBookProvider();
+    } else {
+      _bookProvider = BookProvider();
+    }
+
     _fetchBookPages();
+  }
+
+  void _startListening() {
+    _sttProvider.startListening(
+      onSpeechResult: _onSpeechResult,
+    );
+  }
+
+  void _stopListening() {
+    _sttProvider.stopListening();
   }
 
   void reset() {
@@ -56,51 +100,6 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
       lastDetectedTextSize = 1;
       spokenWords = [];
     });
-  }
-
-  String getMessage(double score) {
-    if (score >= 90) {
-      return "Excellent!";
-    } else if (score >= 80) {
-      return "Great!";
-    } else if (score >= 70) {
-      return "Good!";
-    } else if (score >= 60) {
-      return "Nice!";
-    } else if (score >= 50) {
-      return "Not bad!";
-    } else {
-      return "Keep practicing!";
-    }
-  }
-
-  List<String> getReferenceWords() {
-    return _currentPage.content
-        .trim()
-        .split(RegExp(r"[^-'\w]+"))
-        .map((e) =>
-            e.replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '').toLowerCase())
-        .where((element) => element.isNotEmpty)
-        .toList();
-  }
-
-  Future<void> _fetchBookPages() async {
-    List<BookPage> bookpages = await _bookProvider.getBookPagesById(book.id!);
-    setState(() {
-      pages = bookpages;
-      _currentPage = pages[0];
-      referenceWords = getReferenceWords();
-    });
-  }
-
-  void _startListening() {
-    _sttProvider.startListening(
-      onSpeechResult: _onSpeechResult,
-    );
-  }
-
-  void _stopListening() {
-    _sttProvider.stopListening();
   }
 
   void _onSpeechResult(result) {
@@ -122,6 +121,32 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
         _stopListening();
       }
     });
+  }
+
+  String getMessage(double score) {
+    if (score >= 90) {
+      return "Excellent!";
+    } else if (score >= 80) {
+      return "Great!";
+    } else if (score >= 70) {
+      return "Good!";
+    } else if (score >= 60) {
+      return "Nice!";
+    } else if (score >= 50) {
+      return "Not bad!";
+    } else {
+      return "Keep practicing!";
+    }
+  }
+
+  List<String> getReferenceWords() {
+    return currentPage.content
+        .trim()
+        .split(RegExp(r"[^-'\w]+"))
+        .map((e) =>
+            e.replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '').toLowerCase())
+        .where((element) => element.isNotEmpty)
+        .toList();
   }
 
   Text wordToRead() {
@@ -212,8 +237,6 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     );
   }
 
-  bool get isListening => _sttProvider.isListening;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -225,26 +248,28 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
           Navigator.pop(context);
         },
         actions: [
-          IconButton(
-            icon: Icon(
-              Icons.edit_rounded,
-              color: (!hasListened)
-                  ? ConstantUI.customYellow
-                  : ConstantUI.customGrey,
-            ),
-            onPressed: (!hasListened)
-                ? () async {
-                    _stopListening();
-                    reset();
-                    await showDialog(
-                        context: context,
-                        builder: (context) => EditBookPageModal(
-                            bookPage: _currentPage,
-                            pageNumber: _currentPageIndex));
-                    _fetchBookPages();
-                  }
-                : null,
-          )
+          (fromOnline)
+              ? EMPTY_SPACE
+              : IconButton(
+                  icon: Icon(
+                    Icons.edit_rounded,
+                    color: (!hasListened)
+                        ? ConstantUI.customYellow
+                        : ConstantUI.customGrey,
+                  ),
+                  onPressed: (!hasListened)
+                      ? () async {
+                          _stopListening();
+                          reset();
+                          await showDialog(
+                              context: context,
+                              builder: (context) => EditBookPageModal(
+                                  bookPage: currentPage,
+                                  pageNumber: currentPageIndex));
+                          _fetchBookPages();
+                        }
+                      : null,
+                )
         ],
       ),
       body: PageView.builder(
@@ -254,8 +279,8 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
         onPageChanged: (index) {
           reset();
           setState(() {
-            _currentPage = pages[index];
-            _currentPageIndex = index;
+            currentPage = pages[index];
+            currentPageIndex = index;
             referenceWords = getReferenceWords();
           });
         },
@@ -269,10 +294,24 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
               Expanded(
                 flex: 3,
                 child: PageImageDisplay(
-                  image: Image.memory(
-                    page.photo!,
-                    fit: BoxFit.cover,
-                  ),
+                  image: (fromOnline)
+                      ? Image.network(
+                          page.photoUrl!,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            } else {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                          },
+                          fit: BoxFit.cover,
+                        )
+                      : Image.memory(
+                          page.photo!,
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
               Expanded(
@@ -329,11 +368,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
           (hasListened)
               ? CustomFloatingAction(
                   btnColor: ConstantUI.customYellow,
-                  btnIcon: const Icon(
-                    Icons.replay_rounded,
-                    color: Colors.white,
-                    size: 50,
-                  ),
+                  icon: Icons.replay_rounded,
                   onPressed: () {
                     replay();
                     _startListening();
@@ -344,11 +379,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
           CustomFloatingAction(
             btnColor:
                 (!hasListened) ? ConstantUI.customBlue : ConstantUI.customPink,
-            btnIcon: Icon(
-              (!hasListened) ? Icons.mic : Icons.exit_to_app_rounded,
-              color: Colors.white,
-              size: 50,
-            ),
+            icon: (!hasListened) ? Icons.mic : Icons.exit_to_app_rounded,
             onPressed: () {
               if (!hasListened) {
                 _startListening();

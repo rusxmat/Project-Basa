@@ -1,3 +1,4 @@
+import 'package:basa_proj_app/models/book_page_local_model.dart';
 import 'package:basa_proj_app/services/book_service.dart';
 import 'package:basa_proj_app/shared/image_util.dart';
 import 'package:camera/camera.dart';
@@ -52,7 +53,7 @@ class BookProvider extends ChangeNotifier {
 
     for (var i = 0; i < bookContent.length; i++) {
       await db.createBookPage(
-        BookPage(
+        BookPageLocal(
           pageNumber: pageNumber,
           content: bookContent[i],
           bookId: bookId,
@@ -91,30 +92,4 @@ class BookProvider extends ChangeNotifier {
     await db.updateBookPage(bookPage, bookPageId);
     notifyListeners();
   }
-
-  // // Read a specific book by its index
-  // Book getBook(int index) {
-  //   if (index >= 0 && index < books.length) {
-  //     return books[index];
-  //   }
-  //   return null;
-  // }
-
-  // // Update a book by its index
-  // void updateBook(int index, Book updatedBook) {
-  //   if (index >= 0 && index < books.length) {
-  //     books[index] = updatedBook;
-  //     notifyListeners();
-  //   }
-  // }
-
-  // // Delete a book by its index
-
-  // TODO: Add necessary properties and methods
-
-  // TODO: Implement the constructor
-
-  // TODO: Implement other methods
-
-  // TODO: Implement getters and setters if needed
 }

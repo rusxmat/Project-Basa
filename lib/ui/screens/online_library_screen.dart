@@ -1,5 +1,5 @@
 import 'package:basa_proj_app/models/book_model.dart';
-import 'package:basa_proj_app/ui/screens/book_online_screen.dart';
+import 'package:basa_proj_app/ui/modals/mode_choice_modal.dart';
 import 'package:basa_proj_app/ui/widgets/book_card.dart';
 import 'package:basa_proj_app/ui/widgets/custom_appbar_widget.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +12,6 @@ class OnlineLibraryScreen extends StatefulWidget {
 
 class _OnlineLibraryScreenState extends State<OnlineLibraryScreen> {
   final OnlineBookProvider onlineBookProvider = OnlineBookProvider();
-
-  List<Book> books = [];
 
   Future<List<Book>> _fetchBooks() async {
     return await onlineBookProvider.getAllBooks();
@@ -40,20 +38,19 @@ class _OnlineLibraryScreenState extends State<OnlineLibraryScreen> {
             );
           } else {
             return ListView.builder(
+              padding: const EdgeInsets.all(10),
               itemCount: snapshot.data?.length,
               itemBuilder: (context, index) {
                 Book book = snapshot.data![index];
                 return BookCard(
                   book: book,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookOnlineScreen(
-                          book: book,
-                        ),
-                      ),
-                    );
+                    showDialog(
+                        context: context,
+                        builder: (context) => ModeChoiceModal(
+                              fromOnline: true,
+                              book: book,
+                            ));
                   },
                 );
               },

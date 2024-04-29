@@ -15,19 +15,13 @@ class LibraryScreen extends StatefulWidget {
 
 class _LibraryScreenState extends State<LibraryScreen> {
   final BookProvider _bookProvider = BookProvider();
-  List<Book> _books = [];
 
-  Future<void> _fetchBooks() async {
-    List<Book> books = await _bookProvider.getAllBooks();
-    setState(() {
-      _books = books;
-    });
+  Future<List<Book>> _fetchBooks() async {
+    return await _bookProvider.getAllBooks();
   }
 
   @override
   Widget build(BuildContext context) {
-    _fetchBooks();
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -48,55 +42,77 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(10),
-        itemCount: _books.length,
-        itemBuilder: (context, index) {
-          Book book = _books[index];
-          return BookCard(
-            book: book,
-            trailing: PopupMenuButton<String>(
-              onSelected: (value) async {
-                if (value == 'edit') {
-                  showDialog(
-                    context: context,
-                    builder: (context) => EditBookModal(
-                      book: book,
-                    ),
-                  );
-                } else if (value == 'delete') {
-                  showDialog(
-                    context: context,
-                    builder: (context) => ConfirmDeleteModal(
-                      bookId: book.id!,
-                    ),
-                  );
-                }
+      body: FutureBuilder<List<Book>>(
+        future: _fetchBooks(),
+        builder: (BuildContext context, AsyncSnapshot<List<Book>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else {
+            final List<Book> books = snapshot.data!;
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(10),
+              itemCount: books.length,
+              itemBuilder: (context, index) {
+                Book book = books[index];
+                return BookCard(
+                  book: book,
+                  trailing: PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'edit') {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => EditBookModal(
+                            book: book,
+                          ),
+                        );
+                      } else if (value == 'delete') {
+                        await showDialog(
+                          context: context,
+                          builder: (context) => ConfirmDeleteModal(
+                            bookId: book.id!,
+                          ),
+                        );
+                      }
+                      setState(() {});
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'edit',
+                        child: Text('Edit'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'delete',
+                        child: Text('Delete'),
+                      ),
+                    ],
+                  ),
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => ModeChoiceModal(
+                              fromOnline: false,
+                              book: book,
+                            ));
+                  },
+                );
               },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'edit',
-                  child: Text('Edit'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Text('Delete'),
-                ),
-              ],
-            ),
-            onTap: () {
-              showDialog(
-                  context: context,
-                  builder: (context) => ModeChoiceModal(
-                        book: book,
-                      ));
-            },
-          );
+            );
+          }
         },
       ),
       floatingActionButton: CustomFloatingAction(
-        btnIcon: const Icon(Icons.download_rounded, color: Colors.white),
+        icon: Icons.download_rounded,
+        iconSize: 30,
         btnColor: ConstantUI.customBlue,
+        extendedText: "Online Library",
         onPressed: () {
           Navigator.pushNamed(context, '/onlinelib');
         },

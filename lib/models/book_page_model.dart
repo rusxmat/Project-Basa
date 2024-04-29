@@ -6,6 +6,8 @@ class BookPage {
   int pageNumber;
   String content;
   Uint8List? photo;
+  String? photoUrl;
+  String? imageFileName;
 
   BookPage({
     this.id,
@@ -13,6 +15,8 @@ class BookPage {
     required this.pageNumber,
     required this.content,
     this.photo,
+    this.photoUrl,
+    this.imageFileName,
   });
 
   Map<String, dynamic> toMap() {
@@ -22,6 +26,8 @@ class BookPage {
       'pageNumber': pageNumber,
       'content': content,
       'photo': photo,
+      'photoUrl': photoUrl,
+      'imageFileName': imageFileName,
     };
   }
 
@@ -32,6 +38,8 @@ class BookPage {
       pageNumber: map['pageNumber'],
       content: map['content'],
       photo: map['photo'],
+      photoUrl: map['photoUrl'],
+      imageFileName: map['imageFileName'],
     );
   }
 }
