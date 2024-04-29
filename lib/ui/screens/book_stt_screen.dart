@@ -96,7 +96,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     );
   }
 
-  void _stopListening() async {
+  void _stopListening() {
     _sttProvider.stopListening();
   }
 
@@ -395,4 +395,3 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     );
   }
 }
-//BUG WHEN MOVING TO NEXT PAGE THE WORD HIGHLIGHT IS NOT RESET

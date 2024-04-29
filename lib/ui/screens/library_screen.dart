@@ -6,7 +6,6 @@ import 'package:basa_proj_app/ui/modals/mode_choice_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/models/book_model.dart';
-import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   @override
@@ -26,7 +25,6 @@ class _LibraryScreenState extends State<LibraryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final BookProvider _bookProvider = Provider.of<BookProvider>(context);
     _fetchBooks();
 
     return Scaffold(
@@ -70,7 +68,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     const TextStyle(color: ConstantUI.customBlue, fontSize: 12),
               ),
               trailing: PopupMenuButton<String>(
-                onSelected: (value) {
+                onSelected: (value) async {
                   if (value == 'edit') {
                     showDialog(
                       context: context,
