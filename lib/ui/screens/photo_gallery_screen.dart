@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:basa_proj_app/ui/modals/view_image_modal.dart';
 import 'package:basa_proj_app/ui/screens/book_create_screen.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/ui/widgets/nophotos_warning_card.dart';
@@ -146,7 +147,16 @@ class _PhotoGalleryScreenState extends State<PhotoGalleryScreen> {
                                       !selectedPhotos[index];
                                 });
                               }
-                            : null,
+                            : () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => ViewImageModal(
+                                    image: Image.file(
+                                      File(widget.photos[index].path),
+                                    ),
+                                  ),
+                                );
+                              },
                         child: Image.file(
                           File(photos[index].path),
                           fit: BoxFit.cover,
