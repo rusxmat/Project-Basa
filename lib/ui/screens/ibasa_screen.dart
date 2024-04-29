@@ -3,21 +3,37 @@ import 'package:camera/camera.dart';
 import 'package:basa_proj_app/ui/screens/photo_gallery_screen.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class IbasaScreen extends StatefulWidget {
   @override
   _IbasaScreenState createState() => _IbasaScreenState();
 }
 
-class _IbasaScreenState extends State<IbasaScreen> {
+class _IbasaScreenState extends State<IbasaScreen>
+    with SingleTickerProviderStateMixin {
   CameraController? _controller;
   Future<void>? _initializeControllerFuture;
   List<XFile>? _capturedImages = [];
+
+  AnimationController? _captureController;
+  Animation<double>? _captureAnimation;
+  AudioPlayer _cameraShutterPlayer = AudioPlayer();
+
+  Future<void> playCaptureSound() async {
+    await _cameraShutterPlayer.play(AssetSource('audio/camera_click.mp3'));
+  }
 
   @override
   void initState() {
     super.initState();
     _initializeCamera();
+    _captureController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _captureAnimation =
+        Tween<double>(begin: 0.0, end: 1.0).animate(_captureController!);
   }
 
   Future<void> _initializeCamera() async {
@@ -28,10 +44,12 @@ class _IbasaScreenState extends State<IbasaScreen> {
     _controller = CameraController(
       firstCamera,
       ResolutionPreset.max,
+      enableAudio: true,
     );
 
     // Initialize the controller future
     _initializeControllerFuture = _controller!.initialize();
+    _controller!.setFlashMode(FlashMode.off);
 
     // Rebuild the widget when controller is initialized
     setState(() {});
@@ -51,6 +69,10 @@ class _IbasaScreenState extends State<IbasaScreen> {
         setState(() {
           _capturedImages!.add(capturedImage);
         });
+        _captureController!.forward();
+        await playCaptureSound();
+        await Future.delayed(const Duration(milliseconds: 150));
+        _captureController!.reverse();
       } catch (e) {
         print('Error capturing photo: $e');
       }
@@ -96,6 +118,19 @@ class _IbasaScreenState extends State<IbasaScreen> {
               }
             },
           ),
+          Center(
+            child: FadeTransition(
+              opacity: _captureAnimation!,
+              child: Container(
+                width: 80.0,
+                height: 80.0,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.8),
+                  borderRadius: BorderRadius.circular(50.0),
+                ),
+              ),
+            ),
+          ),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -119,8 +154,8 @@ class _IbasaScreenState extends State<IbasaScreen> {
                   const Spacer(),
                   CustomFloatingAction(
                     btnIcon: FORWARD_ICON,
-                    onPressed: () {
-                      Navigator.push(
+                    onPressed: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => PhotoGalleryScreen(
@@ -128,6 +163,7 @@ class _IbasaScreenState extends State<IbasaScreen> {
                           ),
                         ),
                       );
+                      // _initializeCamera();
                     },
                     btnColor: Colors.white,
                   ),

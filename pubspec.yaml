@@ -47,6 +47,7 @@ dependencies:
   speech_to_text: ^6.6.1
   image: ^4.1.7
   connectivity_plus: ^6.0.3
+  audioplayers: ^6.0.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,7 @@ flutter:
   uses-material-design: true
 
   assets: 
+    - assets/audio/camera_click.mp3
     - assets/images/basa_logo.png
     - assets/images/basa_text_logo.png
 

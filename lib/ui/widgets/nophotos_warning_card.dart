@@ -1,5 +1,4 @@
 import 'package:basa_proj_app/shared/constant_ui.dart';
-import 'package:basa_proj_app/ui/screens/ibasa_screen.dart';
 import 'package:basa_proj_app/ui/widgets/custom_buttons_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -48,11 +47,7 @@ class NoPhotosWarningCard extends StatelessWidget {
                 text: 'Bumalik sa Ibasa',
                 onPressed: (onPressed == null)
                     ? () {
-                        Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => IbasaScreen()),
-                            ModalRoute.withName("/"));
+                        Navigator.pop(context);
                       }
                     : onPressed!,
               ),
