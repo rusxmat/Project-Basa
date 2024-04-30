@@ -42,6 +42,11 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   void initState() {
     bookProvider = Provider.of<BookProvider>(context, listen: false);
     _future = bookProvider!.ocrBookPhotos(widget.photos);
+    _future?.then((data) {
+      _bookContentControllers =
+          data.map((item) => TextEditingController(text: item)).toList();
+      setState(() {}); // Rebuild the widget tree with controllers
+    });
     super.initState();
     // photos = widget.photos;
   }
@@ -107,7 +112,7 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: ConstantUI.customYellow,
       appBar: AppBar(
         leading: IconButton(
@@ -155,13 +160,8 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
                       // If the Future completed with an error, show an error message
                       return Text('Error: ${snapshot.error}');
                     } else {
-                      List<String> bookContent = snapshot.data!;
-                      _bookContentControllers = List.generate(
-                          widget.photos.length,
-                          (index) =>
-                              TextEditingController(text: bookContent[index]));
-
                       return ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(),
                         itemCount: widget.photos.length + 1,
                         itemBuilder: ((context, index) {
                           if (index == 0) {
@@ -224,97 +224,104 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
 
                           index--;
 
-                          return Card(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            elevation: 0,
-                            color: Colors.white,
-                            child: IntrinsicWidth(
-                              stepWidth: double.infinity,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                          return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 10),
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                                elevation: 0,
+                                color: Colors.white,
+                                child: IntrinsicWidth(
+                                  stepWidth: double.infinity,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 10, horizontal: 20),
-                                        child: Text(
-                                          'Page ${index + 1}',
-                                          style: const TextStyle(
-                                            color: ConstantUI.customBlue,
-                                            fontSize: 16,
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 10, horizontal: 20),
+                                            child: Text(
+                                              'Page ${index + 1}',
+                                              style: const TextStyle(
+                                                color: ConstantUI.customBlue,
+                                                fontSize: 16,
+                                              ),
+                                            ),
                                           ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 0, horizontal: 10),
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.delete,
+                                                color: ConstantUI.customPink,
+                                              ),
+                                              onPressed: () {
+                                                _bookContentControllers
+                                                    .removeAt(index);
+                                                widget.photos.removeAt(index);
+                                                setState(() {});
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (context) =>
+                                                ViewImageModal(
+                                              image: Image.file(
+                                                File(widget.photos[index].path),
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Image.file(
+                                          File(widget.photos[index].path),
+                                          height: 150,
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 0, horizontal: 10),
-                                        child: IconButton(
-                                          icon: const Icon(
-                                            Icons.delete,
-                                            color: ConstantUI.customPink,
-                                          ),
-                                          onPressed: () {
-                                            _bookContentControllers
-                                                .removeAt(index);
-                                            widget.photos.removeAt(index);
-                                            setState(() {});
-                                          },
-                                        ),
+                                      ValueListenableBuilder(
+                                        valueListenable:
+                                            _bookContentControllers[index],
+                                        builder: (context, value, child) {
+                                          return Padding(
+                                            padding:
+                                                (_bookContentControllers[index]
+                                                        .text
+                                                        .isNotEmpty)
+                                                    ? const EdgeInsets.all(0)
+                                                    : const EdgeInsets.fromLTRB(
+                                                        0, 0, 0, 10),
+                                            child: CustomTextField(
+                                              controller:
+                                                  _bookContentControllers[
+                                                      index],
+                                              isTextArea: true,
+                                              defaultMaxLines: 5,
+                                              errorText: _submitted
+                                                  ? _errorTextBookContent(
+                                                      _bookContentControllers[
+                                                          index])
+                                                  : null,
+                                            ),
+                                          );
+                                        },
                                       ),
                                     ],
                                   ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) => ViewImageModal(
-                                          image: Image.file(
-                                            File(widget.photos[index].path),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    child: Image.file(
-                                      File(widget.photos[index].path),
-                                      height: 150,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  ValueListenableBuilder(
-                                    valueListenable:
-                                        _bookContentControllers[index],
-                                    builder: (context, value, child) {
-                                      return Padding(
-                                        padding: (_bookContentControllers[index]
-                                                .text
-                                                .isNotEmpty)
-                                            ? const EdgeInsets.all(0)
-                                            : const EdgeInsets.fromLTRB(
-                                                0, 0, 0, 10),
-                                        child: CustomTextField(
-                                          controller:
-                                              _bookContentControllers[index],
-                                          isTextArea: true,
-                                          defaultMaxLines: 5,
-                                          errorText: _submitted
-                                              ? _errorTextBookContent(
-                                                  _bookContentControllers[
-                                                      index])
-                                              : null,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
+                                ),
+                              ));
                         }),
                       );
                     }

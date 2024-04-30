@@ -12,18 +12,22 @@ import 'package:basa_proj_app/providers/book_provider.dart';
 import 'package:basa_proj_app/models/book_model.dart';
 
 class LibraryScreen extends StatefulWidget {
+  const LibraryScreen({super.key});
+
   @override
   _LibraryScreenState createState() => _LibraryScreenState();
 }
 
 class _LibraryScreenState extends State<LibraryScreen> {
   final BookProvider _bookProvider = BookProvider();
+  bool hasLoaded = false;
   List<Book> books = [];
 
   void _fetchBooks() async {
     List<Book> futureBooks = await _bookProvider.getAllBooks();
     setState(() {
       books = futureBooks;
+      if (!hasLoaded) hasLoaded = true;
     });
   }
 
@@ -51,7 +55,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ),
         ),
       ),
-      body: (books.isEmpty)
+      body: (books.isEmpty && hasLoaded)
           ? const NoBooksWarningCard()
           : ListView.builder(
               padding: const EdgeInsets.all(10),
@@ -93,11 +97,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
                   ),
                   onTap: () {
                     showDialog(
-                        context: context,
-                        builder: (context) => ModeChoiceModal(
-                              fromOnline: false,
-                              book: book,
-                            ));
+                      context: context,
+                      builder: (context) => ModeChoiceModal(
+                        fromOnline: false,
+                        book: book,
+                      ),
+                    );
                   },
                 );
               },

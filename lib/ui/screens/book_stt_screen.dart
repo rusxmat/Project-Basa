@@ -75,6 +75,13 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     _fetchBookPages();
   }
 
+  @override
+  void dispose() {
+    _stopListening();
+    _sttProvider.dispose();
+    super.dispose();
+  }
+
   void _startListening() {
     _sttProvider.startListening(
       onSpeechResult: _onSpeechResult,
@@ -83,6 +90,10 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
 
   void _stopListening() {
     _sttProvider.stopListening();
+  }
+
+  Future<void> _stopListeningFuture() async {
+    await _sttProvider.stopListeningFuture();
   }
 
   void reset() {
@@ -117,6 +128,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
       if (lastDetectedTextSize < spokenWords.length) {
         lastDetectedTextSize++;
       }
+
       if (spokenWords.length == referenceWords.length) {
         _stopListening();
       }
@@ -213,9 +225,11 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     int score = 0;
 
     for (int i = 0; i < spokenWords.length; i++) {
-      String referenceWord = referenceWords[i].toLowerCase();
+      if (referenceWords.length == i) break;
 
-      String spokenWord = spokenWords[i].toLowerCase(); // Make case-insensitive
+      String referenceWord = referenceWords[i].toLowerCase();
+      String spokenWord = spokenWords[i].toLowerCase();
+      // Make case-insensitive
       if (spokenWord == referenceWord) score++;
     }
 

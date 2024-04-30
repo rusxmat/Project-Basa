@@ -1,9 +1,11 @@
 import 'package:basa_proj_app/providers/book_provider.dart';
+import 'package:basa_proj_app/ui/screens/help_screen.dart';
 import 'package:basa_proj_app/ui/screens/library_screen.dart';
 import 'package:basa_proj_app/ui/screens/online_library_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:basa_proj_app/ui/screens/menu_page.dart';
 import 'package:basa_proj_app/ui/screens/ibasa_screen.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,6 +32,11 @@ class BasaApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+
     return MaterialApp(
       title: 'Basa App',
       theme: ThemeData(
@@ -44,8 +51,7 @@ class BasaApp extends StatelessWidget {
         '/ibasa': (context) => IbasaScreen(),
         '/onlinelib': (context) => OnlineLibraryScreen(),
         '/library': (context) => LibraryScreen(),
-        // '/setting': (context) => SettingScreen(),
-        // '/help': (context) => HelpScreen(),
+        '/help': (context) => HelpScreen(),
       },
     );
   }

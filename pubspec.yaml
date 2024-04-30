@@ -49,6 +49,7 @@ dependencies:
   connectivity_plus: ^6.0.3
   audioplayers: ^6.0.0
   supabase_flutter: ^2.5.2
+  flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
   flutter_test:
@@ -112,3 +113,8 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/images/basa_logo.png"
+  min_sdk_version: 21

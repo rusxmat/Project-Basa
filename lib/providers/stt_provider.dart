@@ -33,4 +33,8 @@ class SttProvider with ChangeNotifier {
   void stopListening() async {
     await _speechToText!.stop();
   }
+
+  Future<void> stopListeningFuture() async {
+    await _speechToText!.stop();
+  }
 }

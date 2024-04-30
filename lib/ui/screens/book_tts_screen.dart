@@ -72,6 +72,13 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
   }
 
   @override
+  void dispose() {
+    _ttsProvider!.stop();
+    _ttsProvider!.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
 
