@@ -92,10 +92,6 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
     _sttProvider.stopListening();
   }
 
-  Future<void> _stopListeningFuture() async {
-    await _sttProvider.stopListeningFuture();
-  }
-
   void reset() {
     setState(() {
       wordsSpoken = "";
@@ -381,19 +377,29 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
         children: [
           (hasListened)
               ? CustomFloatingAction(
-                  btnColor: ConstantUI.customYellow,
-                  icon: Icons.replay_rounded,
-                  onPressed: () {
-                    replay();
-                    _startListening();
-                  },
+                  btnColor:
+                      ((hasListened && !isListening) || spokenWords.isEmpty)
+                          ? (spokenWords.isEmpty)
+                              ? ConstantUI.customBlue
+                              : ConstantUI.customYellow
+                          : Colors.white,
+                  icon: (spokenWords.isEmpty)
+                      ? Icons.mic
+                      : Icons.replay_circle_filled_rounded,
+                  onPressed:
+                      ((hasListened && !isListening) || spokenWords.isEmpty)
+                          ? () {
+                              replay();
+                              _startListening();
+                            }
+                          : null,
                 )
               : EMPTY_SPACE,
           (hasListened) ? const SizedBox(height: 10.0) : EMPTY_SPACE,
           CustomFloatingAction(
             btnColor:
                 (!hasListened) ? ConstantUI.customBlue : ConstantUI.customPink,
-            icon: (!hasListened) ? Icons.mic : Icons.exit_to_app_rounded,
+            icon: (!hasListened) ? Icons.mic : Icons.close_rounded,
             onPressed: () {
               if (!hasListened) {
                 _startListening();
@@ -405,7 +411,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
                 reset();
               }
             },
-          ),
+          )
         ],
       ),
     );

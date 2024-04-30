@@ -36,6 +36,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
     _fetchBooks();
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(
@@ -59,8 +60,12 @@ class _LibraryScreenState extends State<LibraryScreen> {
           ? const NoBooksWarningCard()
           : ListView.builder(
               padding: const EdgeInsets.all(10),
-              itemCount: books.length,
+              itemCount: books.length + 1,
               itemBuilder: (context, index) {
+                if (index == books.length) {
+                  return const SizedBox(height: 70);
+                }
+
                 Book book = books[index];
                 return BookCard(
                   book: book,

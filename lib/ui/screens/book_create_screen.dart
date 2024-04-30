@@ -35,6 +35,8 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   Future<List<String>>? _future;
   String? _languageSelected = LANGUAGE_CODES['Filipino'];
   List<Widget> contentFields = [];
+
+  bool _isSubmitting = false;
   bool _submitted = false;
   bool _isAddingBook = false;
 
@@ -76,19 +78,12 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   }
 
   void _submitBook() async {
-    if (!_submitted) {
-      setState(() {
-        _submitted = true;
-      });
-    }
-
-    if (!_isInputValid) {
-      return;
-    }
-
-    setState(() {
-      _isAddingBook = true;
-    });
+    setState(() => _isSubmitting = true);
+    if (!_submitted) setState(() => _submitted = true);
+    bool isInputValid = _isInputValid;
+    setState(() => _isSubmitting = false);
+    if (!isInputValid) return;
+    setState(() => _isAddingBook = true);
 
     Book bookToCreate = Book(
       title: _titleController.text,
@@ -337,9 +332,10 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
           return CustomFloatingAction(
             btnColor: Colors.white,
             btnIcon: FORWARD_ICON,
-            onPressed: ((_isInputValid || !_submitted) &&
-                    widget.photos.isNotEmpty &&
-                    !_isAddingBook)
+            onPressed: (((_isInputValid || !_submitted) &&
+                        widget.photos.isNotEmpty &&
+                        !_isAddingBook) ||
+                    _isSubmitting)
                 ? () => _submitBook()
                 : null,
           );
