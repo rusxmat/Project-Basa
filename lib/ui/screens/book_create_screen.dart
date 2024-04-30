@@ -7,6 +7,7 @@ import 'package:basa_proj_app/ui/widgets/custom_floatingaction_btn.dart';
 import 'package:basa_proj_app/shared/constants.dart';
 import 'package:basa_proj_app/shared/constant_ui.dart';
 import 'package:basa_proj_app/ui/widgets/custom_textfield.dart';
+import 'package:basa_proj_app/ui/widgets/loading_card.dart';
 import 'package:basa_proj_app/ui/widgets/nophotos_warning_card.dart';
 import 'package:basa_proj_app/shared/input_validation_util.dart';
 
@@ -35,6 +36,7 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
   String? _languageSelected = LANGUAGE_CODES['Filipino'];
   List<Widget> contentFields = [];
   bool _submitted = false;
+  bool _isAddingBook = false;
 
   @override
   void initState() {
@@ -68,7 +70,7 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
     return errorTextBookContent(bookContentController.value.text);
   }
 
-  void _submitBook() {
+  void _submitBook() async {
     if (!_submitted) {
       setState(() {
         _submitted = true;
@@ -79,6 +81,10 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
       return;
     }
 
+    setState(() {
+      _isAddingBook = true;
+    });
+
     Book bookToCreate = Book(
       title: _titleController.text,
       author: _authorController.text,
@@ -86,7 +92,7 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
       pageCount: _bookContentControllers.length,
     );
 
-    bookProvider!.addBook(
+    await bookProvider!.addBook(
       bookToCreate,
       _bookContentControllers.map((e) => e.text).toList(),
       widget.photos,
@@ -105,20 +111,24 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
       backgroundColor: ConstantUI.customYellow,
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back,
-            color: ConstantUI.customYellow,
+            color: (_isAddingBook)
+                ? ConstantUI.customGrey
+                : ConstantUI.customYellow,
           ),
-          onPressed: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => PhotoGalleryScreen(
-                  photos: widget.photos,
-                ),
-              ),
-            );
-          },
+          onPressed: (_isAddingBook)
+              ? null
+              : () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PhotoGalleryScreen(
+                        photos: widget.photos,
+                      ),
+                    ),
+                  );
+                },
         ),
         backgroundColor: ConstantUI.customBlue,
         title: const Text(
@@ -129,180 +139,187 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
           ),
         ),
       ),
-      body: (widget.photos.isEmpty)
-          ? const NoPhotosWarningCard()
-          : FutureBuilder<List<String>>(
-              future: _future,
-              builder:
-                  (BuildContext context, AsyncSnapshot<List<String>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  // If the Future is still processing, show a loading spinner
-                  return const Center(child: CIRCULAR_PROGRESS_INDICATOR);
-                } else if (snapshot.hasError) {
-                  // If the Future completed with an error, show an error message
-                  return Text('Error: ${snapshot.error}');
-                } else {
-                  List<String> bookContent = snapshot.data!;
-                  _bookContentControllers = List.generate(
-                      widget.photos.length,
-                      (index) =>
-                          TextEditingController(text: bookContent[index]));
+      body: (_isAddingBook)
+          ? const LoadingCard(title: 'Ginagawa ang Libro...')
+          : (widget.photos.isEmpty)
+              ? const NoPhotosWarningCard()
+              : FutureBuilder<List<String>>(
+                  future: _future,
+                  builder: (BuildContext context,
+                      AsyncSnapshot<List<String>> snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // If the Future is still processing, show a loading spinner
+                      return const LoadingCard(
+                          title: 'Binabasa ang mga Larawan...');
+                    } else if (snapshot.hasError) {
+                      // If the Future completed with an error, show an error message
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      List<String> bookContent = snapshot.data!;
+                      _bookContentControllers = List.generate(
+                          widget.photos.length,
+                          (index) =>
+                              TextEditingController(text: bookContent[index]));
 
-                  return ListView.builder(
-                    itemCount: widget.photos.length + 1,
-                    itemBuilder: ((context, index) {
-                      if (index == 0) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8.0, vertical: 5),
-                          child: Column(
-                            children: [
-                              ValueListenableBuilder(
-                                valueListenable: _titleController,
-                                builder: (context, value, child) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: CustomTextField(
-                                      hintText: 'Title',
-                                      controller: _titleController,
-                                      errorText: _submitted
-                                          ? _errorTextBookTitle
-                                          : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                              ValueListenableBuilder(
-                                valueListenable: _authorController,
-                                builder: (context, value, child) {
-                                  return Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: CustomTextField(
-                                      hintText: 'Author',
-                                      controller: _authorController,
-                                      errorText: _submitted
-                                          ? _errorTextBookAuthor
-                                          : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: ToggleSwitch(
-                                  minWidth: 90,
-                                  fontSize: 16,
-                                  inactiveBgColor: Colors.white,
-                                  inactiveFgColor: Colors.black45,
-                                  cornerRadius: 50,
-                                  initialLabelIndex: 0,
-                                  labels: LANGUAGE_CODES.keys.toList(),
-                                  onToggle: (index) {
-                                    _languageSelected =
-                                        LANGUAGE_CODES.values.toList()[index!];
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      }
-
-                      index--;
-
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        elevation: 0,
-                        color: Colors.white,
-                        child: IntrinsicWidth(
-                          stepWidth: double.infinity,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                      return ListView.builder(
+                        itemCount: widget.photos.length + 1,
+                        itemBuilder: ((context, index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8.0, vertical: 5),
+                              child: Column(
                                 children: [
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 10, horizontal: 20),
-                                    child: Text(
-                                      'Page ${index + 1}',
-                                      style: const TextStyle(
-                                        color: ConstantUI.customBlue,
-                                        fontSize: 16,
-                                      ),
-                                    ),
+                                  ValueListenableBuilder(
+                                    valueListenable: _titleController,
+                                    builder: (context, value, child) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: CustomTextField(
+                                          hintText: 'Title',
+                                          controller: _titleController,
+                                          errorText: _submitted
+                                              ? _errorTextBookTitle
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable: _authorController,
+                                    builder: (context, value, child) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: CustomTextField(
+                                          hintText: 'Author',
+                                          controller: _authorController,
+                                          errorText: _submitted
+                                              ? _errorTextBookAuthor
+                                              : null,
+                                        ),
+                                      );
+                                    },
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 0, horizontal: 10),
-                                    child: IconButton(
-                                      icon: const Icon(
-                                        Icons.delete,
-                                        color: ConstantUI.customPink,
-                                      ),
-                                      onPressed: () {
-                                        _bookContentControllers.removeAt(index);
-                                        widget.photos.removeAt(index);
-                                        setState(() {});
+                                    padding: const EdgeInsets.all(10),
+                                    child: ToggleSwitch(
+                                      minWidth: 90,
+                                      fontSize: 16,
+                                      inactiveBgColor: Colors.white,
+                                      inactiveFgColor: Colors.black45,
+                                      cornerRadius: 50,
+                                      initialLabelIndex: 0,
+                                      labels: LANGUAGE_CODES.keys.toList(),
+                                      onToggle: (index) {
+                                        _languageSelected = LANGUAGE_CODES
+                                            .values
+                                            .toList()[index!];
                                       },
                                     ),
                                   ),
                                 ],
                               ),
-                              GestureDetector(
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => ViewImageModal(
-                                      image: Image.file(
-                                        File(widget.photos[index].path),
+                            );
+                          }
+
+                          index--;
+
+                          return Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            elevation: 0,
+                            color: Colors.white,
+                            child: IntrinsicWidth(
+                              stepWidth: double.infinity,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 10, horizontal: 20),
+                                        child: Text(
+                                          'Page ${index + 1}',
+                                          style: const TextStyle(
+                                            color: ConstantUI.customBlue,
+                                            fontSize: 16,
+                                          ),
+                                        ),
                                       ),
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 0, horizontal: 10),
+                                        child: IconButton(
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            color: ConstantUI.customPink,
+                                          ),
+                                          onPressed: () {
+                                            _bookContentControllers
+                                                .removeAt(index);
+                                            widget.photos.removeAt(index);
+                                            setState(() {});
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) => ViewImageModal(
+                                          image: Image.file(
+                                            File(widget.photos[index].path),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: Image.file(
+                                      File(widget.photos[index].path),
+                                      height: 150,
+                                      fit: BoxFit.cover,
                                     ),
-                                  );
-                                },
-                                child: Image.file(
-                                  File(widget.photos[index].path),
-                                  height: 150,
-                                  fit: BoxFit.cover,
-                                ),
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable:
+                                        _bookContentControllers[index],
+                                    builder: (context, value, child) {
+                                      return Padding(
+                                        padding: (_bookContentControllers[index]
+                                                .text
+                                                .isNotEmpty)
+                                            ? const EdgeInsets.all(0)
+                                            : const EdgeInsets.fromLTRB(
+                                                0, 0, 0, 10),
+                                        child: CustomTextField(
+                                          controller:
+                                              _bookContentControllers[index],
+                                          isTextArea: true,
+                                          defaultMaxLines: 5,
+                                          errorText: _submitted
+                                              ? _errorTextBookContent(
+                                                  _bookContentControllers[
+                                                      index])
+                                              : null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
-                              ValueListenableBuilder(
-                                valueListenable: _bookContentControllers[index],
-                                builder: (context, value, child) {
-                                  return Padding(
-                                    padding: (_bookContentControllers[index]
-                                            .text
-                                            .isNotEmpty)
-                                        ? const EdgeInsets.all(0)
-                                        : const EdgeInsets.fromLTRB(
-                                            0, 0, 0, 10),
-                                    child: CustomTextField(
-                                      controller:
-                                          _bookContentControllers[index],
-                                      isTextArea: true,
-                                      defaultMaxLines: 5,
-                                      errorText: _submitted
-                                          ? _errorTextBookContent(
-                                              _bookContentControllers[index])
-                                          : null,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
+                          );
+                        }),
                       );
-                    }),
-                  );
-                }
-              },
-            ),
+                    }
+                  },
+                ),
       floatingActionButton: AnimatedBuilder(
         animation: Listenable.merge([
           _titleController,
@@ -313,10 +330,11 @@ class _BookCreateScreenState extends State<BookCreateScreen> {
           return CustomFloatingAction(
             btnColor: Colors.white,
             btnIcon: FORWARD_ICON,
-            onPressed:
-                ((_isInputValid || !_submitted) && widget.photos.isNotEmpty)
-                    ? () => _submitBook()
-                    : null,
+            onPressed: ((_isInputValid || !_submitted) &&
+                    widget.photos.isNotEmpty &&
+                    !_isAddingBook)
+                ? () => _submitBook()
+                : null,
           );
         },
       ),
