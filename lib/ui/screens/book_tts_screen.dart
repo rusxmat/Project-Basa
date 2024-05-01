@@ -263,59 +263,51 @@ class _BookTTSScreenState extends State<BookTTSScreen> {
                             children: getTextSpans(page.content),
                           ),
                         ),
+                        Container(
+                          height: 120,
+                        )
                       ],
                     ),
                   ),
                 ),
               ),
-              (ttsInitialized)
-                  ? Expanded(
-                      flex: 1,
-                      child: Card(
-                        elevation: 4,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25.0),
-                        ),
-                        margin: const EdgeInsets.all(10.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            CustomIconButton(
-                              icon: const Icon(Icons.replay_rounded),
-                              onPressed: _replay,
-                              backgroundColor: ConstantUI.customYellow,
-                            ),
-                            CustomIconButton(
-                              icon: const Icon(Icons.square_rounded),
-                              onPressed: () {
-                                setState(() {
-                                  _ttsProvider!.stop();
-                                  hardResetTTS();
-                                });
-                              },
-                              backgroundColor: ConstantUI.customPink,
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                  : EMPTY_SPACE
             ],
           );
         },
       ),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          (!ttsInitialized)
-              ? CustomFloatingAction(
-                  btnColor: ConstantUI.customBlue,
-                  icon: Icons.volume_up_rounded,
-                  onPressed: () {
+          CustomFloatingAction(
+            btnColor: (!ttsInitialized)
+                ? ConstantUI.customBlue
+                : ConstantUI.customYellow,
+            icon: (!ttsInitialized)
+                ? Icons.volume_up_rounded
+                : Icons.replay_rounded,
+            onPressed: (!ttsInitialized)
+                ? () {
                     setState(() {
                       ttsInitialized = true;
                       _speak();
+                    });
+                  }
+                : _replay,
+          ),
+          (ttsInitialized) ? Container(height: 10) : EMPTY_SPACE,
+          (ttsInitialized)
+              ? CustomFloatingAction(
+                  btnColor: ConstantUI.customPink,
+                  btnIcon: Icon(
+                    Icons.square_rounded,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _ttsProvider!.stop();
+                      hardResetTTS();
                     });
                   },
                 )

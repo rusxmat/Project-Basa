@@ -150,7 +150,7 @@ class _BookSTTScreenState extends State<BookSTTScreen> {
   List<String> getReferenceWords() {
     return currentPage.content
         .trim()
-        .split(RegExp(r"[^-'\w]+"))
+        .split(RegExp(r"[^'\w]+"))
         .map((e) =>
             e.replaceAll(RegExp(r'^[^\w\s]+|[^\w\s]+$'), '').toLowerCase())
         .where((element) => element.isNotEmpty)
